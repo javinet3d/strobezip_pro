@@ -1,0 +1,2809 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0b0b0c">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="StrobeZippo">
+  <title>StrobePro & Zippo Studio</title>
+  <!-- Favicon SVG directo con el icono del flash -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230b0b0c'/%3E%3Crect x='4' y='4' width='56' height='56' rx='13' fill='%2317171a' stroke='%232e2e36' stroke-width='2'/%3E%3Cpath d='M35 11L19 35h11l-3 18 18-24H34l1-18z' fill='%23f59e0b' stroke='%23fef3c7' stroke-width='1.2' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link id="pwa-manifest-link" rel="manifest" href="">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --matte-black: #0b0b0c;
+      --matte-surface: #17171a;
+      --matte-elevated: #242429;
+      --amber-accent: #f59e0b;
+      --chrome-accent: #e5e7eb;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100dvh;
+      min-height: 100dvh;
+      background-color: #0b0b0c;
+      color: #f3f4f6;
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+    }
+
+    body {
+      background-image:
+        radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.04) 0%, transparent 60%),
+        repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.008) 0px, rgba(255, 255, 255, 0.008) 1px, transparent 1px, transparent 4px);
+    }
+
+    /* Respaldo CSS de orientación vertical ('portrait') */
+    #portrait-lock-wrapper {
+      width: 100%;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    @media screen and (orientation: landscape) and (max-height: 540px) {
+      body:not(.zippo-fullscreen-mode) #portrait-lock-wrapper {
+        max-width: 430px;
+        margin: 0 auto;
+        border-left: 1px solid rgba(255, 255, 255, 0.09);
+        border-right: 1px solid rgba(255, 255, 255, 0.09);
+        background-color: #0b0b0c;
+      }
+    }
+
+    .font-mono-tech {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Aislamiento estricto de vistas para evitar cualquier solapamiento entre pestañas */
+    .view-section:not(.active) {
+      display: none !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+
+    .view-section.active {
+      display: flex !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+    }
+
+    /* Superficies Negro Mate Satinado */
+    .matte-panel {
+      background: linear-gradient(145deg, #1b1b1f 0%, #131316 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.09),
+        0 6px 18px -4px rgba(0, 0, 0, 0.8);
+    }
+
+    .tactical-btn {
+      background: linear-gradient(180deg, #27272d 0%, #17171a 100%);
+      border: 1px solid #32323a;
+      color: #f9fafb;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.09),
+        0 3px 6px rgba(0, 0, 0, 0.55);
+      transition: transform 0.08s ease, background 0.1s ease, border-color 0.1s ease;
+    }
+
+    .tactical-btn:active {
+      transform: translateY(1px) scale(0.985);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.7);
+    }
+
+    .tactical-btn.active-amber {
+      background: linear-gradient(180deg, #d97706 0%, #92400e 100%);
+      border-color: #fbbf24;
+      color: #ffffff;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.35),
+        0 0 16px rgba(245, 158, 11, 0.45);
+    }
+
+    .tactical-btn.active-emerald {
+      background: linear-gradient(180deg, #059669 0%, #065f46 100%);
+      border-color: #34d399;
+      color: #ffffff;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.35),
+        0 0 16px rgba(16, 185, 129, 0.45);
+    }
+
+    .tactical-btn.active-red {
+      background: linear-gradient(180deg, #dc2626 0%, #991b1b 100%);
+      border-color: #f87171;
+      color: #ffffff;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.35),
+        0 0 16px rgba(239, 68, 68, 0.45);
+    }
+
+    /* Sliders tácticos */
+    input[type="range"].tactical-slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 8px;
+      background: #0b0b0c;
+      border-radius: 999px;
+      border: 1px solid #2e2e36;
+      box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.85);
+      outline: none;
+    }
+
+    input[type="range"].tactical-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #f9fafb 0%, #9ca3af 60%, #4b5563 100%);
+      border: 2px solid #18181b;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.85), inset 0 1px 1px #ffffff;
+      cursor: pointer;
+    }
+
+    input[type="range"].tactical-slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #f9fafb 0%, #9ca3af 60%, #4b5563 100%);
+      border: 2px solid #18181b;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.85);
+      cursor: pointer;
+    }
+
+    #screen-flash-overlay {
+      pointer-events: none;
+      transition: opacity 0.015s linear;
+    }
+
+    /* Contenedor normal del Zippo (nunca fixed ni z-index elevado fuera de pantalla completa) */
+    #zippoCard {
+      position: relative;
+      z-index: auto;
+      transition: none !important;
+      animation: none !important;
+    }
+
+    #zippoCanvasWrapper {
+      position: relative;
+      z-index: auto;
+      touch-action: none;
+      transition: none !important;
+      animation: none !important;
+    }
+
+    #zippo-canvas {
+      position: relative;
+      z-index: auto;
+      display: block;
+      width: 100%;
+      height: 100%;
+      transition: none !important;
+      animation: none !important;
+    }
+
+    /* Pantalla completa minimalista del Zippo (solo activa bajo body.zippo-fullscreen-mode) */
+    body.zippo-fullscreen-mode {
+      background-color: #000000 !important;
+      background-image: none !important;
+      overflow: hidden !important;
+    }
+    body.zippo-fullscreen-mode #portrait-lock-wrapper {
+      max-width: 100vw !important;
+      width: 100vw !important;
+      height: 100dvh !important;
+      border: none !important;
+    }
+    body.zippo-fullscreen-mode header,
+    body.zippo-fullscreen-mode #zippo-top-toolbar {
+      display: none !important;
+    }
+    body.zippo-fullscreen-mode main {
+      max-width: 100vw !important;
+      width: 100vw !important;
+      height: 100dvh !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    body.zippo-fullscreen-mode #view-zippo.active {
+      height: 100dvh !important;
+      width: 100vw !important;
+      gap: 0 !important;
+    }
+    body.zippo-fullscreen-mode #zippoCard {
+      position: fixed !important;
+      inset: 0 !important;
+      z-index: 30 !important;
+      border-radius: 0 !important;
+      border: none !important;
+      background: #000000 !important;
+      box-shadow: none !important;
+      height: 100dvh !important;
+      width: 100vw !important;
+    }
+    body.zippo-fullscreen-mode #zippoCanvasWrapper {
+      height: 100dvh !important;
+      width: 100vw !important;
+    }
+    body.zippo-fullscreen-mode #btn-exit-fullscreen {
+      display: flex !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Vídeo activo de 16x16 px con opacity 0.01 para mantener el LED operativo en PWA instalada -->
+  <video id="torchVideo" width="16" height="16" playsinline muted autoplay style="position:fixed;bottom:0;right:0;width:16px;height:16px;opacity:0.01;pointer-events:none;z-index:1;"></video>
+
+  <!-- Capa de flash de pantalla sincronizado -->
+  <div id="screen-flash-overlay" class="fixed inset-0 z-50 bg-white opacity-0"></div>
+
+  <!-- Aviso flotante discreto (sin alert) -->
+  <div id="toast-notification" class="fixed top-14 left-1/2 -translate-x-1/2 z-50 px-3.5 py-1.5 rounded-full bg-zinc-900/95 border border-white/15 text-[11px] font-mono-tech text-zinc-100 shadow-2xl opacity-0 pointer-events-none transition-opacity duration-150 whitespace-nowrap"></div>
+
+  <div id="portrait-lock-wrapper">
+    <!-- Barra Superior Compacta: Título, Estado LED, Selector Hardware y Test LED -->
+    <header class="w-full max-w-md px-3 pt-2 pb-1.5 z-20 shrink-0">
+      <div class="px-2.5 py-1.5 rounded-xl bg-[#141417] border border-white/10 flex items-center justify-between gap-1.5">
+        <div class="flex items-center gap-1.5 min-w-0">
+          <svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M13 2L4 14h7l-2 8 9-12h-7l2-8z"/>
+          </svg>
+          <span class="text-[11px] font-extrabold tracking-tight text-zinc-100 truncate">StrobePro</span>
+          <span class="text-zinc-600 text-[10px]">•</span>
+          <span id="hw-led-dot" class="w-2 h-2 rounded-full bg-zinc-600 shrink-0"></span>
+          <span id="hw-status-text" class="text-[10px] font-mono-tech text-zinc-300 truncate">LED Listo</span>
+        </div>
+
+        <div class="flex items-center gap-1.5 shrink-0">
+          <select id="output-mode-select" aria-label="Modo de salida" class="bg-[#1c1c21] text-zinc-200 border border-zinc-700 rounded-md px-1.5 py-0.5 text-[10px] font-mono-tech focus:outline-none focus:border-amber-500">
+            <option value="auto">Auto (LED+Pant.)</option>
+            <option value="led">Solo LED Trasero</option>
+            <option value="screen">Solo Pantalla</option>
+          </select>
+          <button id="btn-test-led" type="button" class="px-2 py-0.5 rounded-md bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-[10px] font-bold text-amber-400 active:scale-95">
+            Test LED
+          </button>
+        </div>
+      </div>
+
+      <!-- Control Segmentado de 2 Pestañas -->
+      <div class="matte-panel rounded-xl p-1 mt-1.5 flex items-center justify-between gap-1.5">
+        <button id="tab-torch" type="button" class="flex-1 py-1.5 px-2.5 rounded-lg font-bold text-xs tracking-wide uppercase flex items-center justify-center gap-1.5 transition-all bg-amber-500/20 text-amber-400 border border-amber-500/40">
+          <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+          <span>Linterna / Estrobo</span>
+        </button>
+        <button id="tab-zippo" type="button" class="flex-1 py-1.5 px-2.5 rounded-lg font-bold text-xs tracking-wide uppercase flex items-center justify-center gap-1.5 transition-all text-zinc-400 hover:text-zinc-200 border border-transparent">
+          <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>
+          </svg>
+          <span>Mechero Zippo</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="w-full max-w-md flex-1 px-3 pb-2.5 flex flex-col gap-2 z-10 min-h-0">
+
+      <!-- ========================================================= -->
+      <!-- PESTAÑA 1: LINTERNA / ESTROBO                             -->
+      <!-- ========================================================= -->
+      <section id="view-torch" class="view-section active flex-col gap-2 flex-1 min-h-0 justify-between">
+
+        <!-- Tarjeta 1: Interruptores Principales (Estroboscopio y Linterna Fija) -->
+        <div class="matte-panel rounded-xl p-2.5 flex flex-col gap-2 shrink-0">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div id="beam-indicator" class="w-6 h-6 rounded-lg bg-zinc-900 border border-zinc-700 flex items-center justify-center transition-all duration-75">
+                <div id="beam-core" class="w-2.5 h-2.5 rounded-full bg-zinc-700 transition-all duration-75"></div>
+              </div>
+              <h2 id="torch-mode-label" class="text-sm font-extrabold tracking-tight text-white">APAGADO</h2>
+            </div>
+            <span class="text-[10px] font-mono-tech text-zinc-500 uppercase">CONTROL LED</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <!-- Botón Estroboscopio -->
+            <button id="btn-torch-strobe" type="button" class="tactical-btn py-2.5 px-3 rounded-xl flex flex-col items-center justify-center gap-1">
+              <div class="flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                <span class="text-xs font-extrabold uppercase tracking-wide text-white">Estroboscopio</span>
+              </div>
+              <span id="strobe-sub" class="px-2.5 py-0.5 rounded-full bg-black/55 border border-white/10 text-[10px] font-mono-tech font-bold text-zinc-300">OFF</span>
+            </button>
+
+            <!-- Botón Linterna Fija -->
+            <button id="btn-torch-steady" type="button" class="tactical-btn py-2.5 px-3 rounded-xl flex flex-col items-center justify-center gap-1">
+              <div class="flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                </svg>
+                <span class="text-xs font-extrabold uppercase tracking-wide text-white">Linterna Fija</span>
+              </div>
+              <span id="steady-sub" class="px-2.5 py-0.5 rounded-full bg-black/55 border border-white/10 text-[10px] font-mono-tech font-bold text-zinc-300">OFF</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tarjeta 2: Frecuencia y Tap Tempo (0.10 Hz - 25.00 Hz) -->
+        <div class="matte-panel rounded-xl p-2.5 flex flex-col gap-2 shrink-0">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-baseline gap-2 font-mono-tech min-w-0">
+              <span id="freq-hz-display" class="text-lg font-bold text-amber-400">8.0 Hz</span>
+              <span id="freq-bpm-display" class="text-xs text-zinc-200">480 BPM</span>
+              <span id="freq-interval-display" class="text-[11px] text-zinc-400">(0.13s)</span>
+            </div>
+
+            <button id="btn-tap-tempo" type="button" class="tactical-btn h-8 px-3 rounded-lg text-[10px] font-extrabold uppercase tracking-wider text-amber-300 border-amber-500/35 flex items-center gap-1.5 shrink-0">
+              <span>Tap Tempo</span>
+              <span id="tap-tempo-sub" class="font-mono-tech text-[9px] text-zinc-400">0.1-25Hz</span>
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span class="text-[9px] font-mono-tech text-zinc-500 shrink-0">0.10</span>
+            <input type="range" id="strobe-freq-slider" class="tactical-slider flex-1" min="0.1" max="25" step="0.05" value="8">
+            <span class="text-[9px] font-mono-tech text-zinc-500 shrink-0">25Hz</span>
+          </div>
+        </div>
+
+        <!-- Tarjeta 3: Micrófono Rítmico -->
+        <div class="matte-panel rounded-xl p-2.5 flex-1 min-h-0 flex flex-col justify-between gap-2">
+          <!-- Cabecera y Botón Activar/Desactivar Micrófono -->
+          <div class="flex items-center justify-between gap-2 shrink-0">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="text-xs font-extrabold uppercase tracking-wider text-white truncate">Micrófono Rítmico</span>
+              <span id="beat-badge" class="px-1.5 py-0.5 rounded text-[9px] font-mono-tech font-bold bg-zinc-800 text-zinc-400 border border-zinc-700 transition-colors shrink-0">HIT</span>
+            </div>
+
+            <button id="btn-mic-toggle" type="button" class="tactical-btn h-8 px-3 rounded-lg text-[10px] font-extrabold uppercase tracking-wider flex items-center gap-1.5 shrink-0">
+              <svg class="w-3.5 h-3.5 text-red-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+              </svg>
+              <span id="mic-btn-text" class="text-white">Activar Micrófono</span>
+            </button>
+          </div>
+
+          <!-- Barra de Nivel de Audio en Tiempo Real + Indicador de Umbral -->
+          <div class="flex items-center gap-2 shrink-0">
+            <div class="relative flex-1 h-2.5 bg-[#09090b] rounded-full border border-zinc-800 overflow-hidden">
+              <div id="mic-level-bar" class="h-full w-0 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 transition-all duration-75"></div>
+              <div id="mic-threshold-marker" style="left:60%" class="absolute top-0 bottom-0 w-0.5 bg-red-400 shadow-[0_0_4px_#f87171]"></div>
+            </div>
+            <span id="mic-level-percent" class="text-[10px] font-mono-tech text-zinc-300 w-8 text-right shrink-0">0%</span>
+          </div>
+
+          <!-- Visualizador de Espectro de 80px de altura -->
+          <div class="relative w-full h-[80px] bg-[#09090b] rounded-lg border border-zinc-800 overflow-hidden shadow-inner shrink-0">
+            <canvas id="audio-visualizer" width="360" height="80" class="w-full h-full block"></canvas>
+            <div id="mic-placeholder" class="absolute inset-0 flex items-center justify-center text-[10px] font-mono-tech text-zinc-500 pointer-events-none">
+              [ MICRÓFONO INACTIVO ]
+            </div>
+          </div>
+
+          <!-- Selector de Patrón Rítmico de Ancho Completo -->
+          <div class="relative w-full shrink-0">
+            <select id="rhythm-pattern-select" aria-label="Patrón rítmico" class="w-full h-9 bg-[#111114] text-zinc-100 text-xs font-semibold rounded-lg pl-3 pr-8 border border-zinc-700 focus:border-amber-500 focus:outline-none appearance-none">
+              <option value="single">1x Golpe directo (1 pulso por hit)</option>
+              <option value="double">2x Doble pulso (2 destellos por hit)</option>
+              <option value="triple">3x Tresillo rápido (3 destellos por hit)</option>
+              <option value="quad">4x Ráfaga (4 destellos por hit)</option>
+              <option value="inverted">Pulso invertido (apaga en el hit)</option>
+              <option value="proportional">Continuo proporcional al volumen</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-2.5 flex items-center text-zinc-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Deslizador de Sensibilidad de Ancho Completo -->
+          <div class="w-full flex flex-col gap-1 shrink-0">
+            <div class="flex items-center justify-between text-[10px] font-mono-tech text-zinc-400">
+              <span>SENSIBILIDAD DE DISPARO</span>
+              <span id="threshold-val-display" class="text-amber-400 font-bold">60%</span>
+            </div>
+            <input type="range" id="mic-threshold-slider" class="tactical-slider w-full" min="10" max="95" value="60">
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- PESTAÑA 2: MECHERO ZIPPO NEGRO MATE SATINADO              -->
+      <!-- ========================================================= -->
+      <section id="view-zippo" class="view-section flex-col flex-1 min-h-0">
+
+        <div id="zippoCard" class="matte-panel rounded-2xl relative flex-1 flex flex-col overflow-hidden">
+
+          <!-- Barra Superior Compacta Única -->
+          <div id="zippo-top-toolbar" class="w-full px-2.5 pt-2 pb-1.5 flex items-center justify-between gap-1.5 z-20 shrink-0">
+            <input type="file" id="zippo-sticker-input" accept="image/*" class="hidden">
+
+            <button id="btn-zippo-sensors" type="button" class="tactical-btn flex-1 min-w-0 py-1.5 px-1.5 rounded-lg flex items-center justify-center gap-1 text-[10px] font-mono-tech font-extrabold uppercase tracking-tight">
+              <svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+              </svg>
+              <span id="zippo-sensors-text" class="truncate">Sensores: OFF</span>
+            </button>
+
+            <button id="btn-zippo-manual-led" type="button" class="tactical-btn flex-1 min-w-0 py-1.5 px-1.5 rounded-lg flex items-center justify-center gap-1 text-[10px] font-mono-tech font-extrabold uppercase tracking-tight">
+              <span id="zippo-led-dot" class="w-2 h-2 rounded-full bg-zinc-500 shrink-0"></span>
+              <span id="zippo-led-text" class="truncate">Encender LED</span>
+            </button>
+
+            <button id="btn-zippo-sticker" type="button" class="tactical-btn flex-1 min-w-0 py-1.5 px-1.5 rounded-lg flex items-center justify-center gap-1 text-[10px] font-mono-tech font-extrabold uppercase tracking-tight text-amber-300 border-amber-500/35">
+              <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              <span class="truncate">Pegatina</span>
+            </button>
+
+            <button id="btn-zippo-sticker-clear" type="button" title="Quitar pegatina" class="hidden tactical-btn py-1.5 px-2 rounded-lg items-center justify-center text-[10px] font-mono-tech font-extrabold uppercase tracking-tight text-red-400 border-red-500/35 shrink-0">
+              <span>Quitar</span>
+            </button>
+
+            <button id="btn-zippo-fullscreen" type="button" title="Pantalla Completa" class="tactical-btn py-1.5 px-2 rounded-lg flex items-center justify-center text-amber-300 border-amber-500/40 shrink-0">
+              <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Botón circular minimalista en pantalla completa (solo icono, sin texto) -->
+          <button id="btn-exit-fullscreen" type="button" aria-label="Salir de pantalla completa" class="hidden fixed top-4 right-4 z-40 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 backdrop-blur-md text-white items-center justify-center shadow-2xl">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25"/>
+            </svg>
+          </button>
+
+          <!-- Contenedor del Canvas del Zippo -->
+          <div id="zippoCanvasWrapper" class="relative flex-1 w-full min-h-0 flex items-center justify-center overflow-hidden">
+            <canvas id="zippo-canvas" width="380" height="470" class="w-full h-full block cursor-pointer"></canvas>
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    /**
+     * ============================================================================
+     * 1. BLOQUEO DE ORIENTACIÓN VERTICAL ('portrait') Y MANIFIESTO PWA DINÁMICO
+     * ============================================================================
+     */
+    function lockPortraitOrientation() {
+      try {
+        if (screen.orientation && typeof screen.orientation.lock === 'function') {
+          screen.orientation.lock('portrait').catch(() => {});
+        } else if (typeof screen.lockOrientation === 'function') {
+          screen.lockOrientation('portrait');
+        } else if (typeof screen.mozLockOrientation === 'function') {
+          screen.mozLockOrientation('portrait');
+        } else if (typeof screen.msLockOrientation === 'function') {
+          screen.msLockOrientation('portrait');
+        }
+      } catch (e) {}
+    }
+
+    (function setupDynamicPWA() {
+      try {
+        function createPngIconDataUrl(size) {
+          const c = document.createElement('canvas');
+          c.width = size;
+          c.height = size;
+          const ctx = c.getContext('2d');
+          const r = size * 0.22;
+
+          ctx.fillStyle = '#0b0b0c';
+          ctx.beginPath();
+          ctx.roundRect(0, 0, size, size, r);
+          ctx.fill();
+
+          const inset = size * 0.08;
+          ctx.fillStyle = '#17171a';
+          ctx.strokeStyle = '#32323a';
+          ctx.lineWidth = Math.max(2, size * 0.02);
+          ctx.beginPath();
+          ctx.roundRect(inset, inset, size - inset * 2, size - inset * 2, r * 0.78);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#f59e0b';
+          ctx.beginPath();
+          ctx.moveTo(size * 0.54, size * 0.18);
+          ctx.lineTo(size * 0.30, size * 0.54);
+          ctx.lineTo(size * 0.48, size * 0.54);
+          ctx.lineTo(size * 0.43, size * 0.82);
+          ctx.lineTo(size * 0.70, size * 0.45);
+          ctx.lineTo(size * 0.52, size * 0.45);
+          ctx.closePath();
+          ctx.fill();
+
+          return c.toDataURL('image/png');
+        }
+
+        const icon192 = createPngIconDataUrl(192);
+        const icon512 = createPngIconDataUrl(512);
+
+        const manifest = {
+          name: 'StrobePro & Zippo Studio',
+          short_name: 'StrobeZippo',
+          description: 'Linterna fija, estroboscopio reactivo al sonido y simulador de mechero Zippo.',
+          start_url: location.href,
+          scope: './',
+          display: 'standalone',
+          orientation: 'portrait',
+          background_color: '#0b0b0c',
+          theme_color: '#0b0b0c',
+          icons: [
+            { src: icon192, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+            { src: icon512, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+          ]
+        };
+
+        const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+        const manifestURL = URL.createObjectURL(manifestBlob);
+        const linkEl = document.getElementById('pwa-manifest-link');
+        if (linkEl) linkEl.setAttribute('href', manifestURL);
+      } catch (e) {}
+
+      lockPortraitOrientation();
+      window.addEventListener('orientationchange', lockPortraitOrientation);
+      document.addEventListener('pointerdown', lockPortraitOrientation, { passive: true });
+    })();
+
+    function showToast(message) {
+      try {
+        const toast = document.getElementById('toast-notification');
+        if (!toast) return;
+        toast.textContent = message;
+        toast.style.opacity = '1';
+        clearTimeout(window.__toastTimer);
+        window.__toastTimer = setTimeout(() => {
+          toast.style.opacity = '0';
+        }, 2100);
+      } catch (e) {}
+    }
+
+    function formatHz(hz) {
+      return hz < 1 ? `${hz.toFixed(2)} Hz` : `${hz.toFixed(1)} Hz`;
+    }
+
+    /**
+     * ============================================================================
+     * 2. CONTROLADOR DE FLASH LED TRASERO (COMPATIBLE CON PWA / WEBAPK)
+     * ============================================================================
+     */
+    class SmartHardwareTorchController {
+      constructor() {
+        this.videoEl = document.getElementById('torchVideo');
+        this.stream = null;
+        this.track = null;
+        this.imageCapture = null;
+        this.hasHardwareTorch = false;
+        this.isTorchOn = false;
+        this.initPromise = null;
+
+        this.screenOverlay = document.getElementById('screen-flash-overlay');
+        this.beamIndicator = document.getElementById('beam-indicator');
+        this.beamCore = document.getElementById('beam-core');
+        this.hwDot = document.getElementById('hw-led-dot');
+        this.hwText = document.getElementById('hw-status-text');
+        this.outputModeSelect = document.getElementById('output-mode-select');
+
+        const handleResume = () => {
+          if (document.visibilityState === 'visible') {
+            lockPortraitOrientation();
+            if (this.track && this.track.readyState === 'ended') {
+              this.releaseHardware();
+              if (this.isTorchOn) {
+                this.initHardware().then(() => this.setTorch(true));
+              }
+            } else if (this.isTorchOn && this.hasHardwareTorch) {
+              this.setTorch(true);
+            }
+          }
+        };
+
+        document.addEventListener('visibilitychange', handleResume);
+        window.addEventListener('pageshow', handleResume);
+      }
+
+      updateStatus(text, colorClass = 'bg-zinc-600') {
+        if (this.hwText) this.hwText.textContent = text;
+        if (this.hwDot) this.hwDot.className = `w-2 h-2 rounded-full shrink-0 ${colorClass}`;
+      }
+
+      releaseHardware() {
+        try {
+          if (this.stream) {
+            this.stream.getTracks().forEach((t) => {
+              try { t.stop(); } catch (e) {}
+            });
+          }
+        } catch (e) {}
+        this.stream = null;
+        this.track = null;
+        this.imageCapture = null;
+        this.hasHardwareTorch = false;
+      }
+
+      async tryActivateCameraWithTorch(constraints) {
+        let stream = null;
+        try {
+          stream = await navigator.mediaDevices.getUserMedia(constraints);
+          const track = stream.getVideoTracks()[0];
+          if (!track) {
+            stream.getTracks().forEach(t => t.stop());
+            return null;
+          }
+
+          if (this.videoEl) {
+            this.videoEl.srcObject = stream;
+            try {
+              await this.videoEl.play();
+            } catch (e) {}
+          }
+
+          await new Promise(r => setTimeout(r, 140));
+
+          const caps = typeof track.getCapabilities === 'function' ? track.getCapabilities() : {};
+          if (caps && caps.torch === false) {
+            stream.getTracks().forEach(t => t.stop());
+            return null;
+          }
+
+          try {
+            await track.applyConstraints({ advanced: [{ torch: false }] });
+          } catch (e) {}
+          await track.applyConstraints({ advanced: [{ torch: true }] });
+          await new Promise(r => setTimeout(r, 60));
+
+          const settings = typeof track.getSettings === 'function' ? track.getSettings() : {};
+          if (settings && settings.torch === false && caps && !caps.torch) {
+            stream.getTracks().forEach(t => t.stop());
+            return null;
+          }
+
+          try {
+            await track.applyConstraints({ advanced: [{ torch: false }] });
+          } catch (e) {}
+
+          return { stream, track };
+        } catch (err) {
+          if (stream) {
+            stream.getTracks().forEach(t => { try { t.stop(); } catch (e) {} });
+          }
+          return null;
+        }
+      }
+
+      async initHardware() {
+        if (this.hasHardwareTorch && this.track && this.track.readyState === 'live') {
+          return true;
+        }
+        if (this.initPromise) return this.initPromise;
+
+        this.initPromise = (async () => {
+          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            this.updateStatus('Modo Pantalla', 'bg-amber-500');
+            return false;
+          }
+
+          this.updateStatus('Iniciando LED...', 'bg-amber-400 animate-pulse');
+          this.releaseHardware();
+
+          let found = await this.tryActivateCameraWithTorch({
+            audio: false,
+            video: { facingMode: { ideal: 'environment' } }
+          });
+
+          if (!found && navigator.mediaDevices.enumerateDevices) {
+            try {
+              const devices = await navigator.mediaDevices.enumerateDevices();
+              const videoInputs = devices.filter(d => d.kind === 'videoinput');
+
+              const prioritized = videoInputs.sort((a, b) => {
+                const la = (a.label || '').toLowerCase();
+                const lb = (b.label || '').toLowerCase();
+                const score = (l) => {
+                  let s = 0;
+                  if (l.includes('back') || l.includes('rear') || l.includes('trasera') || l.includes('environment')) s += 10;
+                  if (l.includes('0') || l.includes('main') || l.includes('principal')) s += 5;
+                  if (l.includes('wide') || l.includes('ultra') || l.includes('macro') || l.includes('tele') || l.includes('depth')) s -= 8;
+                  if (l.includes('front') || l.includes('user') || l.includes('frontal')) s -= 20;
+                  return s;
+                };
+                return score(lb) - score(la);
+              });
+
+              for (const dev of prioritized) {
+                found = await this.tryActivateCameraWithTorch({
+                  audio: false,
+                  video: { deviceId: { exact: dev.deviceId } }
+                });
+                if (found) break;
+              }
+            } catch (e) {}
+          }
+
+          if (found) {
+            this.stream = found.stream;
+            this.track = found.track;
+            this.hasHardwareTorch = true;
+            if ('ImageCapture' in window) {
+              try {
+                this.imageCapture = new ImageCapture(this.track);
+              } catch (e) {}
+            }
+            this.updateStatus('LED Trasero Activo', 'bg-emerald-400');
+            return true;
+          } else {
+            this.hasHardwareTorch = false;
+            this.updateStatus('Solo Pantalla', 'bg-amber-500');
+            return false;
+          }
+        })();
+
+        try {
+          return await this.initPromise;
+        } finally {
+          this.initPromise = null;
+        }
+      }
+
+      async setTorch(state, brightness = 1.0) {
+        const targetState = Boolean(state) && brightness > 0.05;
+        this.isTorchOn = targetState;
+        const mode = this.outputModeSelect ? this.outputModeSelect.value : 'auto';
+
+        if (this.beamIndicator && this.beamCore) {
+          if (targetState) {
+            this.beamIndicator.className = 'w-6 h-6 rounded-lg bg-amber-500/25 border border-amber-400 flex items-center justify-center shadow-[0_0_12px_rgba(245,158,11,0.5)] transition-all duration-75';
+            this.beamCore.className = 'w-3 h-3 rounded-full bg-white shadow-[0_0_8px_#ffffff] transition-all duration-75';
+          } else {
+            this.beamIndicator.className = 'w-6 h-6 rounded-lg bg-zinc-900 border border-zinc-700 flex items-center justify-center transition-all duration-75';
+            this.beamCore.className = 'w-2.5 h-2.5 rounded-full bg-zinc-700 transition-all duration-75';
+          }
+        }
+
+        if (mode !== 'screen') {
+          if (targetState && (!this.hasHardwareTorch || !this.track || this.track.readyState !== 'live')) {
+            await this.initHardware();
+          }
+
+          if (this.hasHardwareTorch && this.track && this.track.readyState === 'live') {
+            try {
+              await this.track.applyConstraints({ advanced: [{ torch: targetState }] });
+            } catch (err) {
+              if (this.imageCapture && typeof this.imageCapture.setOptions === 'function') {
+                try {
+                  await this.imageCapture.setOptions({ torch: targetState });
+                } catch (e2) {}
+              }
+            }
+          }
+        } else if (this.hasHardwareTorch && this.track && this.track.readyState === 'live') {
+          try {
+            await this.track.applyConstraints({ advanced: [{ torch: false }] });
+          } catch (e) {}
+        }
+
+        if (this.screenOverlay) {
+          const useScreen = mode === 'screen' || (mode === 'auto' && !this.hasHardwareTorch);
+          if (useScreen && targetState) {
+            this.screenOverlay.style.opacity = String(Math.min(0.95, Math.max(0.25, brightness)));
+          } else {
+            this.screenOverlay.style.opacity = '0';
+          }
+        }
+      }
+
+      async runDiagnosticTest() {
+        const ok = await this.initHardware();
+        if (ok) {
+          await this.setTorch(true);
+          showToast('LED Trasero OK');
+          setTimeout(() => this.setTorch(false), 550);
+        } else {
+          await this.setTorch(true);
+          showToast('Flash de Pantalla OK');
+          setTimeout(() => this.setTorch(false), 400);
+        }
+      }
+    }
+
+    /**
+     * ============================================================================
+     * 3. MOTOR DE ESTROBOSCOPIO (0.10 - 25 Hz) Y MICRÓFONO RÍTMICO
+     * ============================================================================
+     */
+    class StrobeAndAudioEngine {
+      constructor(torchController) {
+        this.torch = torchController;
+        this.mode = 'off';
+        this.frequencyHz = 8.0;
+        this.strobeTimer = null;
+        this.strobeState = false;
+
+        this.tapTimestamps = [];
+
+        this.audioCtx = null;
+        this.micStream = null;
+        this.analyser = null;
+        this.dataArray = null;
+        this.micAnimFrame = null;
+        this.threshold = 0.60;
+        this.rhythmPattern = 'single';
+        this.lastBeatTime = 0;
+        this.scheduledTimeouts = [];
+
+        this.visCanvas = document.getElementById('audio-visualizer');
+        this.visCtx = this.visCanvas ? this.visCanvas.getContext('2d') : null;
+      }
+
+      updateModeUI() {
+        const label = document.getElementById('torch-mode-label');
+        const btnSteady = document.getElementById('btn-torch-steady');
+        const steadySub = document.getElementById('steady-sub');
+        const btnStrobe = document.getElementById('btn-torch-strobe');
+        const strobeSub = document.getElementById('strobe-sub');
+
+        btnSteady.classList.remove('active-amber');
+        steadySub.textContent = 'OFF';
+        steadySub.className = 'px-2.5 py-0.5 rounded-full bg-black/55 border border-white/10 text-[10px] font-mono-tech font-bold text-zinc-300';
+
+        btnStrobe.classList.remove('active-emerald');
+        strobeSub.textContent = 'OFF';
+        strobeSub.className = 'px-2.5 py-0.5 rounded-full bg-black/55 border border-white/10 text-[10px] font-mono-tech font-bold text-zinc-300';
+
+        if (this.mode === 'steady') {
+          label.textContent = 'LINTERNA FIJA';
+          label.className = 'text-sm font-extrabold tracking-tight text-amber-400';
+          btnSteady.classList.add('active-amber');
+          steadySub.textContent = 'ON';
+          steadySub.className = 'px-2.5 py-0.5 rounded-full bg-black/40 border border-white/25 text-[10px] font-mono-tech font-bold text-white';
+        } else if (this.mode === 'strobe') {
+          label.textContent = `ESTROBO • ${formatHz(this.frequencyHz)}`;
+          label.className = 'text-sm font-extrabold tracking-tight text-emerald-400';
+          btnStrobe.classList.add('active-emerald');
+          strobeSub.textContent = 'ON';
+          strobeSub.className = 'px-2.5 py-0.5 rounded-full bg-black/40 border border-white/25 text-[10px] font-mono-tech font-bold text-white';
+        } else if (this.mode === 'mic') {
+          label.textContent = 'MICRÓFONO RÍTMICO';
+          label.className = 'text-sm font-extrabold tracking-tight text-red-400';
+        } else {
+          label.textContent = 'APAGADO';
+          label.className = 'text-sm font-extrabold tracking-tight text-white';
+        }
+      }
+
+      clearStrobeTimer() {
+        if (this.strobeTimer) {
+          clearInterval(this.strobeTimer);
+          this.strobeTimer = null;
+        }
+        this.strobeState = false;
+      }
+
+      clearScheduledPulses() {
+        this.scheduledTimeouts.forEach(id => clearTimeout(id));
+        this.scheduledTimeouts = [];
+      }
+
+      stopAll() {
+        this.clearStrobeTimer();
+        this.clearScheduledPulses();
+        if (this.mode === 'mic') {
+          this.stopMicrophone();
+        }
+        this.mode = 'off';
+        this.torch.setTorch(false);
+        this.updateModeUI();
+      }
+
+      async toggleSteady() {
+        if (this.mode === 'steady') {
+          this.stopAll();
+          return;
+        }
+        this.clearStrobeTimer();
+        this.clearScheduledPulses();
+        if (this.mode === 'mic') this.stopMicrophone();
+
+        this.mode = 'steady';
+        this.updateModeUI();
+        await this.torch.initHardware();
+        await this.torch.setTorch(true);
+      }
+
+      async toggleStrobe() {
+        if (this.mode === 'strobe') {
+          this.stopAll();
+          return;
+        }
+        this.clearStrobeTimer();
+        this.clearScheduledPulses();
+        if (this.mode === 'mic') this.stopMicrophone();
+
+        this.mode = 'strobe';
+        this.updateModeUI();
+        await this.torch.initHardware();
+        this.startStrobeLoop();
+      }
+
+      startStrobeLoop() {
+        this.clearStrobeTimer();
+        const hz = Math.max(0.1, Math.min(25, this.frequencyHz));
+        const halfPeriodMs = Math.max(20, Math.round(500 / hz));
+
+        this.strobeState = true;
+        this.torch.setTorch(true);
+
+        this.strobeTimer = setInterval(() => {
+          if (this.mode !== 'strobe') {
+            this.clearStrobeTimer();
+            return;
+          }
+          this.strobeState = !this.strobeState;
+          this.torch.setTorch(this.strobeState);
+        }, halfPeriodMs);
+      }
+
+      setFrequency(rawVal) {
+        const hz = Math.max(0.1, Math.min(25, parseFloat(rawVal) || 8.0));
+        this.frequencyHz = Math.round(hz * 100) / 100;
+
+        const slider = document.getElementById('strobe-freq-slider');
+        if (slider) slider.value = String(this.frequencyHz);
+
+        const hzDisplay = document.getElementById('freq-hz-display');
+        const bpmDisplay = document.getElementById('freq-bpm-display');
+        const intDisplay = document.getElementById('freq-interval-display');
+
+        if (hzDisplay) hzDisplay.textContent = formatHz(this.frequencyHz);
+        if (bpmDisplay) bpmDisplay.textContent = `${Math.round(this.frequencyHz * 60)} BPM`;
+        if (intDisplay) intDisplay.textContent = `(${(1 / this.frequencyHz).toFixed(2)}s)`;
+
+        if (this.mode === 'strobe') {
+          this.updateModeUI();
+          this.startStrobeLoop();
+        }
+      }
+
+      registerTapTempo() {
+        const now = performance.now();
+        if (this.tapTimestamps.length > 0 && now - this.tapTimestamps[this.tapTimestamps.length - 1] > 11000) {
+          this.tapTimestamps = [];
+        }
+        this.tapTimestamps.push(now);
+        if (this.tapTimestamps.length > 5) {
+          this.tapTimestamps.shift();
+        }
+
+        const sub = document.getElementById('tap-tempo-sub');
+        if (this.tapTimestamps.length < 2) {
+          if (sub) sub.textContent = '1er...';
+          return;
+        }
+
+        let totalInterval = 0;
+        for (let i = 1; i < this.tapTimestamps.length; i++) {
+          totalInterval += (this.tapTimestamps[i] - this.tapTimestamps[i - 1]);
+        }
+        const avgIntervalSec = (totalInterval / (this.tapTimestamps.length - 1)) / 1000;
+        const calculatedHz = Math.max(0.1, Math.min(25, 1 / avgIntervalSec));
+
+        this.setFrequency(calculatedHz);
+        if (sub) sub.textContent = `${avgIntervalSec.toFixed(2)}s`;
+      }
+
+      async toggleMicrophone() {
+        if (this.mode === 'mic') {
+          this.stopAll();
+          return;
+        }
+
+        this.clearStrobeTimer();
+        this.clearScheduledPulses();
+
+        try {
+          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            showToast('Micrófono no disponible');
+            return;
+          }
+
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              echoCancellation: false,
+              noiseSuppression: false,
+              autoGainControl: false
+            }
+          });
+
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          this.audioCtx = new AudioCtx();
+          if (this.audioCtx.state === 'suspended') {
+            await this.audioCtx.resume();
+          }
+
+          this.micStream = stream;
+          const source = this.audioCtx.createMediaStreamSource(stream);
+          this.analyser = this.audioCtx.createAnalyser();
+          this.analyser.fftSize = 256;
+          this.analyser.smoothingTimeConstant = 0.55;
+          source.connect(this.analyser);
+
+          this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+          this.mode = 'mic';
+          this.updateModeUI();
+
+          const btnMic = document.getElementById('btn-mic-toggle');
+          const micText = document.getElementById('mic-btn-text');
+          const placeholder = document.getElementById('mic-placeholder');
+          if (btnMic) btnMic.classList.add('active-red');
+          if (micText) micText.textContent = 'Desactivar';
+          if (placeholder) placeholder.style.display = 'none';
+
+          await this.torch.initHardware();
+          if (this.rhythmPattern === 'inverted') {
+            this.torch.setTorch(true);
+          }
+
+          this.runAudioLoop();
+        } catch (err) {
+          showToast('Permiso de micrófono denegado');
+        }
+      }
+
+      stopMicrophone() {
+        if (this.micAnimFrame) {
+          cancelAnimationFrame(this.micAnimFrame);
+          this.micAnimFrame = null;
+        }
+        if (this.micStream) {
+          this.micStream.getTracks().forEach(t => { try { t.stop(); } catch (e) {} });
+          this.micStream = null;
+        }
+        if (this.audioCtx) {
+          try { this.audioCtx.close(); } catch (e) {}
+          this.audioCtx = null;
+        }
+        this.analyser = null;
+
+        const btnMic = document.getElementById('btn-mic-toggle');
+        const micText = document.getElementById('mic-btn-text');
+        const placeholder = document.getElementById('mic-placeholder');
+        const levelBar = document.getElementById('mic-level-bar');
+        const levelPct = document.getElementById('mic-level-percent');
+
+        if (btnMic) btnMic.classList.remove('active-red');
+        if (micText) micText.textContent = 'Activar Micrófono';
+        if (placeholder) placeholder.style.display = 'flex';
+        if (levelBar) levelBar.style.width = '0%';
+        if (levelPct) levelPct.textContent = '0%';
+
+        if (this.visCtx && this.visCanvas) {
+          this.visCtx.clearRect(0, 0, this.visCanvas.width, this.visCanvas.height);
+        }
+      }
+
+      triggerRhythmHit(intensity) {
+        const pattern = this.rhythmPattern;
+        const badge = document.getElementById('beat-badge');
+        if (badge) {
+          badge.className = 'px-1.5 py-0.5 rounded text-[9px] font-mono-tech font-bold bg-amber-500 text-black border border-amber-300 transition-colors shrink-0';
+          clearTimeout(this.__badgeTimer);
+          this.__badgeTimer = setTimeout(() => {
+            badge.className = 'px-1.5 py-0.5 rounded text-[9px] font-mono-tech font-bold bg-zinc-800 text-zinc-400 border border-zinc-700 transition-colors shrink-0';
+          }, 90);
+        }
+
+        if (pattern === 'proportional') {
+          return;
+        }
+
+        this.clearScheduledPulses();
+
+        if (pattern === 'inverted') {
+          this.torch.setTorch(false);
+          const t1 = setTimeout(() => {
+            if (this.mode === 'mic' && this.rhythmPattern === 'inverted') {
+              this.torch.setTorch(true);
+            }
+          }, 95);
+          this.scheduledTimeouts.push(t1);
+          return;
+        }
+
+        const counts = { single: 1, double: 2, triple: 3, quad: 4 };
+        const pulses = counts[pattern] || 1;
+        const stepMs = pulses === 1 ? 75 : Math.max(48, Math.floor(240 / pulses));
+        const onMs = Math.max(26, Math.floor(stepMs * 0.52));
+
+        for (let i = 0; i < pulses; i++) {
+          const startDelay = i * stepMs;
+          const tOn = setTimeout(() => {
+            if (this.mode === 'mic') this.torch.setTorch(true, intensity);
+          }, startDelay);
+          const tOff = setTimeout(() => {
+            if (this.mode === 'mic') this.torch.setTorch(false);
+          }, startDelay + onMs);
+          this.scheduledTimeouts.push(tOn, tOff);
+        }
+      }
+
+      runAudioLoop() {
+        const loop = () => {
+          if (this.mode !== 'mic' || !this.analyser) return;
+
+          this.analyser.getByteFrequencyData(this.dataArray);
+
+          let weightedSum = 0;
+          let weightTotal = 0;
+          const len = Math.min(48, this.dataArray.length);
+          for (let i = 0; i < len; i++) {
+            const w = i < 14 ? 2.2 : 1.0;
+            weightedSum += (this.dataArray[i] / 255) * w;
+            weightTotal += w;
+          }
+          const level = Math.min(1, (weightedSum / weightTotal) * 1.45);
+          const pct = Math.round(level * 100);
+
+          const levelBar = document.getElementById('mic-level-bar');
+          const levelPct = document.getElementById('mic-level-percent');
+          if (levelBar) levelBar.style.width = `${pct}%`;
+          if (levelPct) levelPct.textContent = `${pct}%`;
+
+          if (this.rhythmPattern === 'proportional') {
+            const triggerFloor = this.threshold * 0.45;
+            if (level >= triggerFloor) {
+              const normBright = Math.min(1, (level - triggerFloor) / Math.max(0.1, 1 - triggerFloor));
+              this.torch.setTorch(true, 0.25 + normBright * 0.75);
+            } else {
+              this.torch.setTorch(false);
+            }
+          } else {
+            const now = performance.now();
+            if (level >= this.threshold && now - this.lastBeatTime > 135) {
+              this.lastBeatTime = now;
+              this.triggerRhythmHit(level);
+            }
+          }
+
+          this.drawVisualizer(level);
+          this.micAnimFrame = requestAnimationFrame(loop);
+        };
+
+        this.micAnimFrame = requestAnimationFrame(loop);
+      }
+
+      drawVisualizer(level) {
+        if (!this.visCtx || !this.visCanvas || !this.dataArray) return;
+        const ctx = this.visCtx;
+        const W = this.visCanvas.width;
+        const H = this.visCanvas.height;
+
+        ctx.clearRect(0, 0, W, H);
+
+        const bars = 40;
+        const barW = (W / bars) - 2;
+        for (let i = 0; i < bars; i++) {
+          const val = (this.dataArray[i] || 0) / 255;
+          const barH = Math.max(2, val * (H - 8));
+          const x = i * (barW + 2) + 1;
+          const y = H - barH;
+
+          ctx.fillStyle = level >= this.threshold ? '#f59e0b' : '#3f3f46';
+          ctx.beginPath();
+          ctx.roundRect(x, y, barW, barH, 2);
+          ctx.fill();
+        }
+
+        const threshY = H - this.threshold * (H - 8);
+        ctx.strokeStyle = 'rgba(239, 68, 68, 0.85)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(0, threshY);
+        ctx.lineTo(W, threshY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+
+    /**
+     * ============================================================================
+     * 4. SINTETIZADOR DE AUDIO METÁLICO PROCEDURAL PARA EL ZIPPO (WEB AUDIO API)
+     * ============================================================================
+     */
+    class ProceduralZippoAudio {
+      constructor() {
+        this.enabled = true;
+        this.ctx = null;
+      }
+
+      ensureCtx() {
+        if (!this.enabled) return null;
+        try {
+          if (!this.ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            this.ctx = new AudioCtx();
+          }
+          if (this.ctx.state === 'suspended') {
+            this.ctx.resume().catch(() => {});
+          }
+          return this.ctx;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      playOpenClink() {
+        const ctx = this.ensureCtx();
+        if (!ctx) return;
+        try {
+          const now = ctx.currentTime;
+          const freqs = [2450, 3890, 5620];
+          freqs.forEach((f, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = idx === 0 ? 'triangle' : 'sine';
+            osc.frequency.setValueAtTime(f, now);
+            osc.frequency.exponentialRampToValueAtTime(f * 0.96, now + 0.16);
+
+            gain.gain.setValueAtTime(0.001, now);
+            gain.gain.linearRampToValueAtTime(0.14 / (idx + 1), now + 0.004);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18 - idx * 0.03);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.2);
+          });
+        } catch (e) {}
+      }
+
+      playCloseClack() {
+        const ctx = this.ensureCtx();
+        if (!ctx) return;
+        try {
+          const now = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(980, now);
+          osc.frequency.exponentialRampToValueAtTime(220, now + 0.055);
+
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.06);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.065);
+        } catch (e) {}
+      }
+
+      playFlintStrike() {
+        const ctx = this.ensureCtx();
+        if (!ctx) return;
+        try {
+          const now = ctx.currentTime;
+          const bufferSize = Math.floor(ctx.sampleRate * 0.065);
+          const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.35));
+          }
+
+          const noise = ctx.createBufferSource();
+          noise.buffer = buffer;
+
+          const filter = ctx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.setValueAtTime(4200, now);
+          filter.Q.setValueAtTime(3.2, now);
+
+          const gain = ctx.createGain();
+          gain.gain.setValueAtTime(0.32, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.065);
+
+          noise.connect(filter);
+          filter.connect(gain);
+          gain.connect(ctx.destination);
+          noise.start(now);
+        } catch (e) {}
+      }
+
+      playIgnitionWhoosh() {
+        const ctx = this.ensureCtx();
+        if (!ctx) return;
+        try {
+          const now = ctx.currentTime;
+          const bufferSize = Math.floor(ctx.sampleRate * 0.14);
+          const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.sin((i / bufferSize) * Math.PI);
+          }
+
+          const noise = ctx.createBufferSource();
+          noise.buffer = buffer;
+
+          const filter = ctx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(520, now);
+          filter.frequency.exponentialRampToValueAtTime(160, now + 0.14);
+
+          const gain = ctx.createGain();
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+
+          noise.connect(filter);
+          filter.connect(gain);
+          gain.connect(ctx.destination);
+          noise.start(now);
+        } catch (e) {}
+      }
+    }
+
+    /**
+     * ============================================================================
+     * 5. SIMULADOR DE MECHERO ZIPPO NEGRO MATE SATINADO (CANVAS 2D)
+     * ============================================================================
+     */
+    class MatteZippoSimulator {
+      constructor(torchController, zippoAudio) {
+        this.torch = torchController;
+        this.audio = zippoAudio;
+
+        this.canvas = document.getElementById('zippo-canvas');
+        this.ctx = this.canvas ? this.canvas.getContext('2d') : null;
+        this.card = document.getElementById('zippoCard');
+        this.wrapper = document.getElementById('zippoCanvasWrapper');
+
+        this.logicalW = 380;
+        this.logicalH = 470;
+        this.isVisible = false;
+
+        this.isOpen = false;
+        this.lidAngle = 0;
+        this.targetLidAngle = 0;
+        this.lidVelocity = 0;
+
+        this.isLit = false;
+        this.isFullscreen = false;
+        this.wheelAngle = 0;
+        this.wheelVelocity = 0;
+
+        this.accelX = 0;
+        this.tiltX = 0;
+        this.speed = 0;
+        this.stretch = 1.0;
+
+        this.sensorsEnabled = false;
+        this.lastShakeTime = 0;
+        this.orientationHandler = (e) => this.handleOrientation(e);
+        this.motionHandler = (e) => this.handleMotion(e);
+
+        this.sparks = [];
+        this.smoke = [];
+        this.flameTime = 0;
+
+        this.stickerStorageKey = 'strobezippo_custom_sticker_v1';
+        this.stickerImage = null;
+
+        this.pointerDown = false;
+        this.startX = 0;
+        this.startY = 0;
+        this.lastX = 0;
+        this.lastY = 0;
+        this.dragMode = null;
+
+        this.loadSavedSticker();
+        this.setupEvents();
+        this.clearCanvasBuffer();
+
+        window.addEventListener('resize', () => {
+          if (!this.isVisible) return;
+          this.resizeCanvas();
+          this.render();
+        });
+      }
+
+      clearCanvasBuffer() {
+        if (!this.ctx || !this.canvas) return;
+        this.ctx.save();
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.restore();
+      }
+
+      setVisible(visible) {
+        this.isVisible = Boolean(visible);
+        if (!this.isVisible) {
+          this.pointerDown = false;
+          this.dragMode = null;
+          if (this.isFullscreen) {
+            this.restoreNormalView(true);
+          }
+          this.clearCanvasBuffer();
+        } else {
+          if (this.card) void this.card.offsetHeight;
+          this.resizeCanvas();
+          this.render();
+        }
+      }
+
+      resizeCanvas() {
+        if (!this.canvas || !this.ctx || !this.isVisible) return;
+
+        const targetEl = this.wrapper || this.card || this.canvas;
+        const rect = targetEl.getBoundingClientRect();
+
+        let w = this.isFullscreen
+          ? Math.floor(window.innerWidth || rect.width || 380)
+          : Math.floor(rect.width || Math.min(416, (window.innerWidth || 412) - 24));
+
+        let h = this.isFullscreen
+          ? Math.floor(window.innerHeight || rect.height || 640)
+          : Math.floor(rect.height || 470);
+
+        if (w < 240) w = Math.max(280, Math.min(416, (window.innerWidth || 412) - 24));
+        if (h < 280) h = 470;
+
+        this.logicalW = w;
+        this.logicalH = h;
+
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const targetCanvasW = Math.floor(w * dpr);
+        const targetCanvasH = Math.floor(h * dpr);
+
+        if (this.canvas.width !== targetCanvasW || this.canvas.height !== targetCanvasH) {
+          this.canvas.width = targetCanvasW;
+          this.canvas.height = targetCanvasH;
+        }
+        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      restoreNormalView(skipRender = false) {
+        this.isFullscreen = false;
+        document.body.classList.remove('zippo-fullscreen-mode');
+
+        const toolbar = document.getElementById('zippo-top-toolbar');
+        const exitBtn = document.getElementById('btn-exit-fullscreen');
+
+        if (toolbar) toolbar.style.display = '';
+        if (exitBtn) exitBtn.classList.add('hidden');
+
+        if (this.card) void this.card.offsetHeight;
+        if (this.wrapper) void this.wrapper.offsetHeight;
+
+        lockPortraitOrientation();
+        if (!skipRender && this.isVisible) {
+          this.resizeCanvas();
+          this.render();
+        } else {
+          this.clearCanvasBuffer();
+        }
+      }
+
+      toggleFullscreen(forceState = null) {
+        const nextState = forceState !== null ? forceState : !this.isFullscreen;
+
+        if (nextState) {
+          if (!this.isVisible) return;
+          this.isFullscreen = true;
+          document.body.classList.add('zippo-fullscreen-mode');
+          const exitBtn = document.getElementById('btn-exit-fullscreen');
+          if (exitBtn) exitBtn.classList.remove('hidden');
+
+          if (this.card) void this.card.offsetHeight;
+          this.resizeCanvas();
+          this.render();
+
+          const el = document.documentElement;
+          try {
+            if (el.requestFullscreen) {
+              el.requestFullscreen().then(() => {
+                lockPortraitOrientation();
+                if (this.isVisible) {
+                  this.resizeCanvas();
+                  this.render();
+                }
+              }).catch(() => {});
+            } else if (el.webkitRequestFullscreen) {
+              el.webkitRequestFullscreen();
+            }
+          } catch (e) {}
+
+          lockPortraitOrientation();
+        } else {
+          this.restoreNormalView(false);
+          try {
+            if (document.fullscreenElement || document.webkitFullscreenElement) {
+              if (document.exitFullscreen) {
+                document.exitFullscreen().catch(() => {});
+              } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+              }
+            }
+          } catch (e) {}
+        }
+      }
+
+      getGeometry() {
+        const W = Math.max(280, this.logicalW || 380);
+        const H = Math.max(360, this.logicalH || 470);
+
+        const bodyUnitW = 176;
+        const bodyUnitH = 196;
+        const lidUnitH = 112;
+        const cornerUnitR = 16;
+        const totalModelUnitH = 481;
+
+        const topMargin = this.isFullscreen ? 44 : 16;
+        const bottomMargin = this.isFullscreen ? 20 : 18;
+        const usableH = Math.max(240, H - topMargin - bottomMargin);
+
+        const widthRatio = this.isFullscreen ? 0.80 : 0.72;
+        const maxScaleByWidth = (W * widthRatio) / bodyUnitW;
+        const maxScaleByHeight = usableH / totalModelUnitH;
+        const scale = Math.min(maxScaleByWidth, maxScaleByHeight);
+
+        const bodyW = bodyUnitW * scale;
+        const bodyH = bodyUnitH * scale;
+        const lidH = lidUnitH * scale;
+        const cornerR = cornerUnitR * scale;
+
+        const bodyCenterX = W * 0.5;
+        const bodyX = bodyCenterX - bodyW * 0.5;
+
+        const baseY = H - bottomMargin;
+        const bodyY = baseY - bodyH;
+
+        const hingeX = bodyX;
+        const hingeY = bodyY;
+
+        return { W, H, scale, bodyX, bodyY, bodyW, bodyH, lidH, cornerR, hingeX, hingeY, topMargin };
+      }
+
+      openLid() {
+        if (this.isOpen) return;
+        this.isOpen = true;
+        this.targetLidAngle = -2.01;
+        this.lidVelocity = -7.2;
+        this.audio.playOpenClink();
+      }
+
+      closeLid() {
+        if (!this.isOpen) return;
+        this.isOpen = false;
+        this.targetLidAngle = 0;
+        this.lidVelocity = 7.8;
+        if (this.isLit) {
+          this.extinguishFlame();
+        }
+        this.audio.playCloseClack();
+      }
+
+      strikeFlint(impulse = 1) {
+        if (!this.isOpen) {
+          this.openLid();
+          return;
+        }
+
+        this.wheelVelocity = Math.max(this.wheelVelocity, 16 * impulse);
+        this.audio.playFlintStrike();
+
+        const g = this.getGeometry();
+        const wheelCenterX = g.bodyX + g.bodyW * 0.85;
+        const wheelCenterY = g.bodyY - g.bodyH * 0.19;
+
+        const sparkCount = 16 + Math.floor(Math.random() * 10);
+        for (let i = 0; i < sparkCount; i++) {
+          const angle = -Math.PI * (0.55 + Math.random() * 0.45);
+          const speed = (2.0 + Math.random() * 4.5) * g.scale;
+          this.sparks.push({
+            x: wheelCenterX - 5 * g.scale,
+            y: wheelCenterY - 4 * g.scale,
+            vx: Math.cos(angle) * speed - 1.1 * g.scale,
+            vy: Math.sin(angle) * speed - 1.4 * g.scale,
+            life: 1.0,
+            decay: 0.035 + Math.random() * 0.03,
+            size: Math.max(1.5, (1.5 + Math.random() * 1.6) * g.scale)
+          });
+        }
+
+        if (!this.isLit && impulse > 0.35) {
+          this.isLit = true;
+          this.stretch = 0.55;
+          this.audio.playIgnitionWhoosh();
+        }
+      }
+
+      extinguishFlame() {
+        if (!this.isLit) return;
+        this.isLit = false;
+
+        const g = this.getGeometry();
+        const wickX = g.bodyX + g.bodyW * 0.48;
+        const wickY = g.bodyY - g.bodyH * 0.30;
+        for (let i = 0; i < 14; i++) {
+          this.smoke.push({
+            x: wickX + (Math.random() - 0.5) * 6 * g.scale,
+            y: wickY - i * 3.5 * g.scale,
+            vx: (Math.random() - 0.5) * 0.75 * g.scale,
+            vy: (-1.0 - Math.random() * 0.9) * g.scale,
+            radius: Math.max(2, (3 + Math.random() * 4.5) * g.scale),
+            alpha: 0.48
+          });
+        }
+      }
+
+      updateSensorsUI(isOn) {
+        const btn = document.getElementById('btn-zippo-sensors');
+        const txt = document.getElementById('zippo-sensors-text');
+        if (btn) btn.classList.toggle('active-emerald', isOn);
+        if (txt) txt.textContent = isOn ? 'Sensores: ON' : 'Sensores: OFF';
+      }
+
+      async toggleSensors() {
+        if (this.sensorsEnabled) {
+          this.sensorsEnabled = false;
+          window.removeEventListener('deviceorientation', this.orientationHandler);
+          window.removeEventListener('devicemotion', this.motionHandler);
+          this.accelX = 0;
+          this.updateSensorsUI(false);
+          showToast('Sensores OFF');
+          return;
+        }
+
+        try {
+          if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+            const res = await DeviceMotionEvent.requestPermission();
+            if (res !== 'granted') {
+              showToast('Permiso denegado');
+              return;
+            }
+          }
+          if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            await DeviceOrientationEvent.requestPermission();
+          }
+
+          if (typeof window.DeviceMotionEvent === 'undefined' && typeof window.DeviceOrientationEvent === 'undefined') {
+            showToast('Sin sensores');
+            return;
+          }
+
+          window.addEventListener('deviceorientation', this.orientationHandler);
+          window.addEventListener('devicemotion', this.motionHandler);
+
+          this.sensorsEnabled = true;
+          this.updateSensorsUI(true);
+          showToast('Sensores ON');
+        } catch (err) {
+          showToast('Sensores bloqueados');
+        }
+      }
+
+      handleOrientation(e) {
+        if (!this.sensorsEnabled || !this.isVisible) return;
+        const gamma = e.gamma || 0;
+        this.accelX = Math.max(-7.5, Math.min(7.5, (gamma / 45) * 6.0));
+      }
+
+      handleMotion(e) {
+        if (!this.sensorsEnabled || !this.isVisible) return;
+        const accG = e.accelerationIncludingGravity;
+        const acc = e.acceleration;
+        if (accG && accG.x !== null) {
+          this.accelX = Math.max(-9.8, Math.min(9.8, accG.x));
+        }
+
+        const linX = acc && acc.x !== null ? acc.x : 0;
+        const linY = acc && acc.y !== null ? acc.y : 0;
+        const linZ = acc && acc.z !== null ? acc.z : 0;
+        this.speed = Math.hypot(linX, linY, linZ);
+
+        const now = performance.now();
+        if (Math.abs(linX) > 13.5 && now - this.lastShakeTime > 520) {
+          this.lastShakeTime = now;
+          if (!this.isOpen) {
+            this.openLid();
+          } else if (Math.abs(linX) > 17.5) {
+            this.closeLid();
+          }
+        }
+
+        if (this.isLit && this.speed > 23) {
+          this.extinguishFlame();
+        }
+      }
+
+      setupEvents() {
+        if (!this.canvas) return;
+
+        const getPos = (e) => {
+          const rect = this.canvas.getBoundingClientRect();
+          const clientX = e.touches && e.touches[0] ? e.touches[0].clientX : e.clientX;
+          const clientY = e.touches && e.touches[0] ? e.touches[0].clientY : e.clientY;
+          return { x: clientX - rect.left, y: clientY - rect.top };
+        };
+
+        const onDown = (e) => {
+          if (!this.isVisible) return;
+          const pos = getPos(e);
+          this.pointerDown = true;
+          this.startX = pos.x;
+          this.startY = pos.y;
+          this.lastX = pos.x;
+          this.lastY = pos.y;
+
+          const g = this.getGeometry();
+          const wheelX = g.bodyX + g.bodyW * 0.85;
+          const wheelY = g.bodyY - g.bodyH * 0.19;
+          const distWheel = Math.hypot(pos.x - wheelX, pos.y - wheelY);
+
+          if (this.isOpen && distWheel < g.bodyW * 0.34) {
+            this.dragMode = 'wheel';
+          } else if (this.isLit && pos.y < g.bodyY - g.bodyH * 0.22 && Math.abs(pos.x - (g.bodyX + g.bodyW * 0.5)) < g.bodyW * 0.45) {
+            this.dragMode = 'flame';
+          } else {
+            this.dragMode = 'lid';
+          }
+        };
+
+        const onMove = (e) => {
+          if (!this.isVisible) return;
+          const pos = getPos(e);
+
+          if (!this.sensorsEnabled && !this.pointerDown && e.type === 'mousemove') {
+            const g = this.getGeometry();
+            const normX = ((pos.x - g.W * 0.5) / (g.W * 0.5)) * 3.2;
+            this.accelX = Math.max(-4.5, Math.min(4.5, normX));
+            this.speed = Math.abs(pos.x - this.lastX) * 0.35;
+          }
+
+          if (!this.pointerDown) {
+            this.lastX = pos.x;
+            this.lastY = pos.y;
+            return;
+          }
+
+          const dx = pos.x - this.lastX;
+          const dy = pos.y - this.lastY;
+
+          if (this.dragMode === 'wheel') {
+            if (dy > 2 || Math.abs(dx) > 3) {
+              this.wheelAngle += (dy + Math.abs(dx)) * 0.08;
+              if (pos.y - this.startY > 14) {
+                this.strikeFlint(1.0);
+                this.dragMode = 'done';
+              }
+            }
+          } else if (this.dragMode === 'lid') {
+            const totalDx = pos.x - this.startX;
+            const totalDy = pos.y - this.startY;
+            if (!this.isOpen && (totalDx < -25 || totalDy < -25)) {
+              this.openLid();
+              this.dragMode = 'done';
+            } else if (this.isOpen && (totalDx > 28 || totalDy > 28)) {
+              this.closeLid();
+              this.dragMode = 'done';
+            }
+          } else if (this.dragMode === 'flame') {
+            this.accelX = Math.max(-6, Math.min(6, -dx * 0.45));
+            this.speed = Math.hypot(dx, dy) * 0.5;
+            if (Math.hypot(pos.x - this.startX, pos.y - this.startY) > 48) {
+              this.extinguishFlame();
+              this.dragMode = 'done';
+            }
+          }
+
+          this.lastX = pos.x;
+          this.lastY = pos.y;
+        };
+
+        const onUp = () => {
+          if (!this.pointerDown) return;
+          this.pointerDown = false;
+          if (!this.isVisible) {
+            this.dragMode = null;
+            return;
+          }
+          const dist = Math.hypot(this.lastX - this.startX, this.lastY - this.startY);
+
+          if (dist < 10) {
+            if (this.dragMode === 'wheel') {
+              this.strikeFlint(1.0);
+            } else if (this.dragMode === 'flame') {
+              this.extinguishFlame();
+            } else if (this.dragMode === 'lid') {
+              if (!this.isOpen) {
+                this.openLid();
+              } else {
+                this.closeLid();
+              }
+            }
+          }
+          this.dragMode = null;
+        };
+
+        this.canvas.addEventListener('mousedown', onDown);
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onUp);
+
+        this.canvas.addEventListener('touchstart', onDown, { passive: true });
+        this.canvas.addEventListener('touchmove', onMove, { passive: true });
+        this.canvas.addEventListener('touchend', onUp);
+      }
+
+      updatePhysics(dt) {
+        if (!this.isVisible) return;
+        this.flameTime += dt;
+
+        const lidStiffness = 155;
+        const lidDamping = 11.5;
+        const lidForce = (this.targetLidAngle - this.lidAngle) * lidStiffness;
+        this.lidVelocity += lidForce * dt;
+        this.lidVelocity *= Math.exp(-lidDamping * dt);
+        this.lidAngle += this.lidVelocity * dt;
+
+        if (this.lidAngle > 0.02) {
+          this.lidAngle = 0;
+          this.lidVelocity = -this.lidVelocity * 0.25;
+        } else if (this.lidAngle < -2.18) {
+          this.lidAngle = -2.18;
+          this.lidVelocity = -this.lidVelocity * 0.35;
+        }
+
+        if (this.wheelVelocity > 0.01) {
+          this.wheelAngle += this.wheelVelocity * dt;
+          this.wheelVelocity *= Math.exp(-6 * dt);
+        }
+
+        const targetTiltX = -this.accelX * 0.14;
+        this.tiltX += (targetTiltX - this.tiltX) * 0.12;
+
+        const targetStretch = 1 + Math.min(0.22, this.speed * 0.015);
+        this.stretch += (targetStretch - this.stretch) * 0.14;
+        this.speed *= 0.90;
+
+        for (let i = this.sparks.length - 1; i >= 0; i--) {
+          const s = this.sparks[i];
+          s.x += s.vx;
+          s.y += s.vy;
+          s.vy += 0.22;
+          s.life -= s.decay;
+          if (s.life <= 0) this.sparks.splice(i, 1);
+        }
+
+        for (let i = this.smoke.length - 1; i >= 0; i--) {
+          const sm = this.smoke[i];
+          sm.x += sm.vx + Math.sin(this.flameTime * 4 + i) * 0.2;
+          sm.y += sm.vy;
+          sm.radius += 0.1;
+          sm.alpha -= 0.008;
+          if (sm.alpha <= 0) this.smoke.splice(i, 1);
+        }
+      }
+
+      render() {
+        const ctx = this.ctx;
+        if (!ctx) return;
+
+        if (!this.isVisible) {
+          this.clearCanvasBuffer();
+          return;
+        }
+
+        const g = this.getGeometry();
+        if (!Number.isFinite(g.W) || !Number.isFinite(g.H) || g.W <= 0 || g.H <= 0) return;
+
+        ctx.clearRect(0, 0, g.W, g.H);
+
+        if (this.isLit) {
+          const wickX = g.bodyX + g.bodyW * 0.48;
+          const wickY = g.bodyY - g.bodyH * 0.34;
+          const rOuter = Math.max(30, g.bodyW * 1.95);
+          const glow = ctx.createRadialGradient(wickX, wickY - 45 * g.scale, 8 * g.scale, wickX, wickY - 45 * g.scale, rOuter);
+          glow.addColorStop(0, 'rgba(255, 165, 45, 0.32)');
+          glow.addColorStop(0.45, 'rgba(255, 106, 0, 0.13)');
+          glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = glow;
+          ctx.fillRect(0, 0, g.W, g.H);
+        }
+
+        this.drawChimneyBackAndWick(ctx, g);
+
+        if (this.isLit) {
+          this.drawNaturalFlame(ctx, g);
+        }
+
+        this.drawChromeInsertFront(ctx, g);
+        this.drawMatteBody(ctx, g);
+        this.drawMatteLid(ctx, g);
+        this.drawHinge(ctx, g);
+        this.drawParticles(ctx);
+      }
+
+      drawChimneyBackAndWick(ctx, g) {
+        const insX = g.bodyX + g.bodyW * 0.18;
+        const insW = g.bodyW * 0.64;
+        const insH = g.bodyH * 0.34;
+        const insY = g.bodyY - insH + 4 * g.scale;
+        const chimX = insX + insW * 0.14;
+        const chimW = insW * 0.68;
+
+        ctx.save();
+        ctx.fillStyle = this.isLit ? '#0c1938' : '#090d16';
+        ctx.beginPath();
+        ctx.roundRect(chimX + 1.5 * g.scale, insY + 1 * g.scale, Math.max(4, chimW - 3 * g.scale), insH + 2 * g.scale, [2 * g.scale, 2 * g.scale, 0, 0]);
+        ctx.fill();
+
+        const wickX = chimX + chimW * 0.5;
+        ctx.strokeStyle = this.isLit ? '#60a5fa' : '#cbd5e1';
+        ctx.lineWidth = Math.max(2, 3.2 * g.scale);
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(wickX, insY + insH * 0.45);
+        ctx.lineTo(wickX, insY + insH * 0.08);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      drawChromeInsertFront(ctx, g) {
+        const insX = g.bodyX + g.bodyW * 0.18;
+        const insW = g.bodyW * 0.64;
+        const insH = g.bodyH * 0.34;
+        const insY = g.bodyY - insH + 4 * g.scale;
+
+        ctx.save();
+
+        ctx.fillStyle = '#cbd5e1';
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = Math.max(1, 1.2 * g.scale);
+        ctx.beginPath();
+        ctx.moveTo(g.bodyX + g.bodyW * 0.04, g.bodyY + 2 * g.scale);
+        ctx.lineTo(g.bodyX + g.bodyW * 0.04, g.bodyY - insH * 0.45);
+        ctx.quadraticCurveTo(g.bodyX + g.bodyW * 0.13, g.bodyY - insH * 0.55, g.bodyX + g.bodyW * 0.22, g.bodyY - insH * 0.25);
+        ctx.lineTo(g.bodyX + g.bodyW * 0.22, g.bodyY + 2 * g.scale);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(g.bodyX + g.bodyW * 0.11, g.bodyY - insH * 0.26, Math.max(2, g.bodyW * 0.032), 0, Math.PI * 2);
+        ctx.fillStyle = '#94a3b8';
+        ctx.fill();
+        ctx.stroke();
+
+        const wheelCenterX = g.bodyX + g.bodyW * 0.85;
+        const wheelCenterY = g.bodyY - insH * 0.56;
+        const wheelRadius = Math.max(6, g.bodyW * 0.135);
+
+        const tubeGrad = ctx.createLinearGradient(wheelCenterX - wheelRadius * 0.5, 0, wheelCenterX + wheelRadius * 0.5, 0);
+        tubeGrad.addColorStop(0, '#475569');
+        tubeGrad.addColorStop(0.5, '#cbd5e1');
+        tubeGrad.addColorStop(1, '#334155');
+        ctx.fillStyle = tubeGrad;
+        ctx.fillRect(wheelCenterX - wheelRadius * 0.48, wheelCenterY + wheelRadius * 0.55, wheelRadius * 0.96, insH * 0.45);
+
+        ctx.save();
+        ctx.translate(wheelCenterX, wheelCenterY);
+        ctx.rotate(this.wheelAngle);
+
+        const teeth = 30;
+        ctx.fillStyle = '#334155';
+        ctx.beginPath();
+        for (let i = 0; i < teeth; i++) {
+          const a = (i / teeth) * Math.PI * 2;
+          const rOuter = wheelRadius + 2.2 * g.scale;
+          const rInner = Math.max(2, wheelRadius - 1 * g.scale);
+          ctx.lineTo(Math.cos(a) * rOuter, Math.sin(a) * rOuter);
+          ctx.lineTo(Math.cos(a + 0.105) * rInner, Math.sin(a + 0.105) * rInner);
+        }
+        ctx.closePath();
+        ctx.fill();
+
+        const wheelGrad = ctx.createRadialGradient(-2, -2, 1, 0, 0, wheelRadius);
+        wheelGrad.addColorStop(0, '#94a3b8');
+        wheelGrad.addColorStop(0.7, '#475569');
+        wheelGrad.addColorStop(1, '#1e293b');
+        ctx.fillStyle = wheelGrad;
+        ctx.beginPath();
+        ctx.arc(0, 0, Math.max(2, wheelRadius - 1 * g.scale), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        const earGrad = ctx.createLinearGradient(insX + insW * 0.7, wheelCenterY - wheelRadius, insX + insW + 18 * g.scale, wheelCenterY + wheelRadius);
+        earGrad.addColorStop(0, '#e2e8f0');
+        earGrad.addColorStop(0.5, '#94a3b8');
+        earGrad.addColorStop(1, '#475569');
+        ctx.fillStyle = earGrad;
+        ctx.beginPath();
+        ctx.moveTo(insX + insW * 0.78, insY + insH * 0.08);
+        ctx.lineTo(wheelCenterX + 3 * g.scale, wheelCenterY - wheelRadius * 0.65);
+        ctx.arc(wheelCenterX, wheelCenterY, wheelRadius * 0.68, -0.6, 1.3);
+        ctx.lineTo(insX + insW * 0.78, insY + insH * 0.78);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = Math.max(0.8, 1 * g.scale);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(wheelCenterX, wheelCenterY, Math.max(2, wheelRadius * 0.34), 0, Math.PI * 2);
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fill();
+        ctx.stroke();
+
+        const chimX = insX + insW * 0.14;
+        const chimW = insW * 0.68;
+        const holeR = Math.max(1.5, chimW * 0.074);
+        const cols = [chimX + chimW * 0.16, chimX + chimW * 0.50, chimX + chimW * 0.84];
+        const rows = [insY + insH * 0.22, insY + insH * 0.52, insY + insH * 0.82];
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.roundRect(chimX, insY, chimW, insH + 4 * g.scale, [2 * g.scale, 2 * g.scale, 0, 0]);
+
+        rows.forEach((ry, rIdx) => {
+          cols.forEach((cx, cIdx) => {
+            if (rIdx === 1 && cIdx === 1) return;
+            ctx.moveTo(cx + holeR, ry);
+            ctx.arc(cx, ry, holeR, 0, Math.PI * 2, true);
+          });
+        });
+        ctx.moveTo(cols[1] + holeR, rows[1]);
+        ctx.arc(cols[1], rows[1], holeR, 0, Math.PI * 2, true);
+        ctx.clip();
+
+        const chimGrad = ctx.createLinearGradient(chimX, insY, chimX + chimW, insY);
+        chimGrad.addColorStop(0.00, '#334155');
+        chimGrad.addColorStop(0.14, '#94a3b8');
+        chimGrad.addColorStop(0.32, '#e2e8f0');
+        chimGrad.addColorStop(0.52, '#cbd5e1');
+        chimGrad.addColorStop(0.78, '#94a3b8');
+        chimGrad.addColorStop(0.92, '#64748b');
+        chimGrad.addColorStop(1.00, '#1e293b');
+
+        ctx.fillStyle = chimGrad;
+        ctx.fillRect(chimX, insY, chimW, insH + 4 * g.scale);
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.lineWidth = 0.7;
+        for (let y = insY + 2; y < insY + insH; y += 3) {
+          ctx.beginPath();
+          ctx.moveTo(chimX, y);
+          ctx.lineTo(chimX + chimW, y);
+          ctx.stroke();
+        }
+
+        if (this.isLit) {
+          const metalWarmGlow = ctx.createLinearGradient(0, insY, 0, insY + insH * 0.55);
+          metalWarmGlow.addColorStop(0, 'rgba(255, 190, 90, 0.35)');
+          metalWarmGlow.addColorStop(1, 'rgba(255, 190, 90, 0)');
+          ctx.fillStyle = metalWarmGlow;
+          ctx.fillRect(chimX, insY, chimW, insH * 0.55);
+        }
+        ctx.restore();
+
+        ctx.strokeStyle = this.isLit ? 'rgba(255, 235, 190, 0.85)' : 'rgba(255, 255, 255, 0.55)';
+        ctx.lineWidth = Math.max(1, 1.2 * g.scale);
+        ctx.beginPath();
+        ctx.moveTo(chimX + 1 * g.scale, insY + 0.6 * g.scale);
+        ctx.lineTo(chimX + chimW - 1 * g.scale, insY + 0.6 * g.scale);
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      drawMatteBody(ctx, g) {
+        ctx.save();
+        const { bodyX, bodyY, bodyW, bodyH, cornerR, scale } = g;
+
+        const matteGrad = ctx.createLinearGradient(bodyX, bodyY, bodyX + bodyW, bodyY);
+        matteGrad.addColorStop(0.00, '#090a0c');
+        matteGrad.addColorStop(0.06, '#383c44');
+        matteGrad.addColorStop(0.14, '#14161a');
+        matteGrad.addColorStop(0.55, '#191b20');
+        matteGrad.addColorStop(0.92, '#111317');
+        matteGrad.addColorStop(0.97, '#2c3038');
+        matteGrad.addColorStop(1.00, '#08090b');
+
+        ctx.fillStyle = matteGrad;
+        ctx.beginPath();
+        ctx.roundRect(bodyX, bodyY, bodyW, bodyH, [2 * scale, 2 * scale, cornerR, cornerR]);
+        ctx.fill();
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+        ctx.lineWidth = Math.max(1, 1.2 * scale);
+        ctx.beginPath();
+        ctx.moveTo(bodyX + 2 * scale, bodyY + 1 * scale);
+        ctx.lineTo(bodyX + bodyW - 2 * scale, bodyY + 1 * scale);
+        ctx.stroke();
+
+        if (this.isLit) {
+          const warmReflection = ctx.createLinearGradient(bodyX, bodyY, bodyX, bodyY + bodyH * 0.45);
+          warmReflection.addColorStop(0, 'rgba(251, 146, 60, 0.25)');
+          warmReflection.addColorStop(1, 'rgba(251, 146, 60, 0)');
+          ctx.fillStyle = warmReflection;
+          ctx.beginPath();
+          ctx.roundRect(bodyX, bodyY, bodyW, bodyH * 0.45, [2 * scale, 2 * scale, 0, 0]);
+          ctx.fill();
+        }
+
+        ctx.strokeStyle = '#050607';
+        ctx.lineWidth = Math.max(1, 1.5 * scale);
+        ctx.beginPath();
+        ctx.roundRect(bodyX, bodyY, bodyW, bodyH, [2 * scale, 2 * scale, cornerR, cornerR]);
+        ctx.stroke();
+
+        if (this.stickerImage && this.stickerImage.complete && this.stickerImage.naturalWidth > 0) {
+          this.drawBodySticker(ctx, g);
+        }
+
+        ctx.restore();
+      }
+
+      loadSavedSticker() {
+        try {
+          const savedDataUrl = localStorage.getItem(this.stickerStorageKey);
+          if (!savedDataUrl) {
+            this.updateStickerUI(false);
+            return;
+          }
+          const img = new Image();
+          img.onload = () => {
+            this.stickerImage = img;
+            this.updateStickerUI(true);
+            if (this.isVisible) this.render();
+          };
+          img.onerror = () => {
+            this.stickerImage = null;
+            this.updateStickerUI(false);
+          };
+          img.src = savedDataUrl;
+        } catch (e) {
+          this.updateStickerUI(false);
+        }
+      }
+
+      processAndSaveSticker(file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const rawImg = new Image();
+          rawImg.onload = () => {
+            try {
+              const maxDim = 640;
+              let w = rawImg.naturalWidth || rawImg.width;
+              let h = rawImg.naturalHeight || rawImg.height;
+              if (w <= 0 || h <= 0) return;
+
+              if (w > maxDim || h > maxDim) {
+                if (w >= h) {
+                  h = Math.round((h * maxDim) / w);
+                  w = maxDim;
+                } else {
+                  w = Math.round((w * maxDim) / h);
+                  h = maxDim;
+                }
+              }
+
+              const offscreen = document.createElement('canvas');
+              offscreen.width = w;
+              offscreen.height = h;
+              const octx = offscreen.getContext('2d');
+              octx.clearRect(0, 0, w, h);
+              octx.drawImage(rawImg, 0, 0, w, h);
+
+              const isAlphaFormat = file.type === 'image/png' || file.type === 'image/webp' || file.type === 'image/svg+xml';
+              const dataUrl = isAlphaFormat
+                ? offscreen.toDataURL('image/png')
+                : offscreen.toDataURL('image/jpeg', 0.88);
+
+              try {
+                localStorage.setItem(this.stickerStorageKey, dataUrl);
+              } catch (storageErr) {}
+
+              const finalImg = new Image();
+              finalImg.onload = () => {
+                this.stickerImage = finalImg;
+                this.updateStickerUI(true);
+                if (this.isVisible) this.render();
+                showToast('Pegatina guardada');
+              };
+              finalImg.src = dataUrl;
+            } catch (err) {
+              showToast('Error de imagen');
+            }
+          };
+          rawImg.onerror = () => showToast('Formato no válido');
+          rawImg.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      clearSticker() {
+        this.stickerImage = null;
+        try {
+          localStorage.removeItem(this.stickerStorageKey);
+        } catch (e) {}
+        const input = document.getElementById('zippo-sticker-input');
+        if (input) input.value = '';
+        this.updateStickerUI(false);
+        if (this.isVisible) this.render();
+        showToast('Pegatina eliminada');
+      }
+
+      updateStickerUI(hasSticker) {
+        const clearBtn = document.getElementById('btn-zippo-sticker-clear');
+        if (clearBtn) {
+          if (hasSticker) {
+            clearBtn.classList.remove('hidden');
+            clearBtn.classList.add('flex');
+          } else {
+            clearBtn.classList.add('hidden');
+            clearBtn.classList.remove('flex');
+          }
+        }
+      }
+
+      drawBodySticker(ctx, g) {
+        const { bodyX, bodyY, bodyW, bodyH, scale } = g;
+        const img = this.stickerImage;
+        const imgW = img.naturalWidth || img.width;
+        const imgH = img.naturalHeight || img.height;
+        if (!imgW || !imgH) return;
+
+        const marginX = bodyW * 0.11;
+        const marginTop = bodyH * 0.08;
+        const marginBottom = bodyH * 0.10;
+        const availW = bodyW - marginX * 2;
+        const availH = bodyH - marginTop - marginBottom;
+
+        const fitScale = Math.min(availW / imgW, availH / imgH);
+        const drawW = imgW * fitScale;
+        const drawH = imgH * fitScale;
+        const drawX = bodyX + (bodyW - drawW) * 0.5;
+        const drawY = bodyY + marginTop + (availH - drawH) * 0.5;
+        const stickerR = Math.max(3, 5 * scale);
+
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
+        ctx.shadowBlur = 4 * scale;
+        ctx.shadowOffsetY = 1.5 * scale;
+
+        ctx.beginPath();
+        ctx.roundRect(drawX, drawY, drawW, drawH, stickerR);
+        ctx.clip();
+
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+
+        ctx.drawImage(img, drawX, drawY, drawW, drawH);
+
+        const cylShade = ctx.createLinearGradient(bodyX, drawY, bodyX + bodyW, drawY);
+        cylShade.addColorStop(0.00, 'rgba(0, 0, 0, 0.35)');
+        cylShade.addColorStop(0.14, 'rgba(255, 255, 255, 0.08)');
+        cylShade.addColorStop(0.50, 'rgba(255, 255, 255, 0.02)');
+        cylShade.addColorStop(0.88, 'rgba(0, 0, 0, 0.14)');
+        cylShade.addColorStop(1.00, 'rgba(0, 0, 0, 0.38)');
+        ctx.fillStyle = cylShade;
+        ctx.fillRect(drawX, drawY, drawW, drawH);
+
+        if (this.isLit) {
+          const flameTint = ctx.createLinearGradient(drawX, drawY, drawX, drawY + drawH);
+          flameTint.addColorStop(0, 'rgba(255, 175, 75, 0.22)');
+          flameTint.addColorStop(1, 'rgba(255, 140, 40, 0.03)');
+          ctx.fillStyle = flameTint;
+          ctx.fillRect(drawX, drawY, drawW, drawH);
+        }
+
+        ctx.restore();
+
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
+        ctx.lineWidth = Math.max(0.75, 1 * scale);
+        ctx.beginPath();
+        ctx.roundRect(drawX, drawY, drawW, drawH, stickerR);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      drawMatteLid(ctx, g) {
+        ctx.save();
+        const { hingeX, hingeY, bodyW, lidH, cornerR, scale } = g;
+
+        ctx.translate(hingeX, hingeY);
+        ctx.rotate(this.lidAngle);
+
+        const lidX = 0;
+        const lidY = -lidH;
+
+        const lidGrad = ctx.createLinearGradient(lidX, lidY, lidX + bodyW, lidY);
+        lidGrad.addColorStop(0.00, '#090a0c');
+        lidGrad.addColorStop(0.06, '#3d424b');
+        lidGrad.addColorStop(0.14, '#14161a');
+        lidGrad.addColorStop(0.55, '#1a1c22');
+        lidGrad.addColorStop(0.92, '#111317');
+        lidGrad.addColorStop(0.97, '#2f343d');
+        lidGrad.addColorStop(1.00, '#08090b');
+
+        ctx.fillStyle = lidGrad;
+        ctx.beginPath();
+        ctx.roundRect(lidX, lidY, bodyW, lidH, [cornerR, cornerR, 2 * scale, 2 * scale]);
+        ctx.fill();
+
+        const topHighlight = ctx.createRadialGradient(lidX + 12 * scale, lidY + 10 * scale, 1 * scale, lidX + 12 * scale, lidY + 10 * scale, 24 * scale);
+        topHighlight.addColorStop(0, 'rgba(255, 255, 255, 0.35)');
+        topHighlight.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = topHighlight;
+        ctx.beginPath();
+        ctx.arc(lidX + 12 * scale, lidY + 10 * scale, 24 * scale, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (this.isLit && this.isOpen) {
+          const innerLidGlow = ctx.createLinearGradient(lidX + bodyW, lidY, lidX, lidY);
+          innerLidGlow.addColorStop(0, 'rgba(255, 195, 110, 0.3)');
+          innerLidGlow.addColorStop(0.35, 'rgba(255, 140, 40, 0.08)');
+          innerLidGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = innerLidGlow;
+          ctx.beginPath();
+          ctx.roundRect(lidX, lidY, bodyW, lidH, [cornerR, cornerR, 2 * scale, 2 * scale]);
+          ctx.fill();
+        }
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+        ctx.lineWidth = Math.max(0.8, 1 * scale);
+        ctx.beginPath();
+        ctx.moveTo(lidX + 2 * scale, -1 * scale);
+        ctx.lineTo(lidX + bodyW - 2 * scale, -1 * scale);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#050607';
+        ctx.lineWidth = Math.max(1, 1.5 * scale);
+        ctx.beginPath();
+        ctx.roundRect(lidX, lidY, bodyW, lidH, [cornerR, cornerR, 2 * scale, 2 * scale]);
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      drawHinge(ctx, g) {
+        const { hingeX, hingeY, scale } = g;
+        ctx.save();
+        ctx.translate(hingeX - 3.5 * scale, hingeY);
+
+        const barrels = 5;
+        const barrelH = 3.2 * scale;
+        const totalH = barrels * barrelH;
+        const startY = -totalH / 2;
+
+        for (let i = 0; i < barrels; i++) {
+          const by = startY + i * barrelH;
+          const bGrad = ctx.createLinearGradient(-4 * scale, by, 4 * scale, by);
+          bGrad.addColorStop(0, '#334155');
+          bGrad.addColorStop(0.45, '#f1f5f9');
+          bGrad.addColorStop(0.85, '#64748b');
+          bGrad.addColorStop(1, '#1e293b');
+
+          ctx.fillStyle = bGrad;
+          ctx.beginPath();
+          ctx.roundRect(-4 * scale, by, 7.5 * scale, barrelH - 0.5 * scale, 1.5 * scale);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      drawNaturalFlame(ctx, g) {
+        const insX = g.bodyX + g.bodyW * 0.18;
+        const insW = g.bodyW * 0.64;
+        const insH = g.bodyH * 0.34;
+        const insY = g.bodyY - insH + 4 * g.scale;
+        const chimX = insX + insW * 0.14;
+        const chimW = insW * 0.68;
+
+        const originX = chimX + chimW * 0.5;
+        const originY = insY + insH * 0.28;
+
+        const flicker = (Math.sin(this.flameTime * 11) * 2.5 + Math.cos(this.flameTime * 19) * 1.5) * g.scale;
+        const maxAvailableTop = Math.max(60, originY - (g.topMargin || 16));
+        const rawFlameH = (195 * g.scale) * this.stretch + flicker * 0.65;
+        const flameH = Math.max(55, Math.min(rawFlameH, maxAvailableTop));
+
+        const baseW = Math.max(5, chimW * 0.22);
+        const maxW = Math.max(8, chimW * 0.30);
+        const tipX = (this.tiltX * 65 * g.scale) + flicker;
+
+        ctx.save();
+        ctx.translate(originX, originY);
+        ctx.globalCompositeOperation = 'screen';
+
+        const haloRadius = Math.max(25, flameH * 0.72);
+        const haloGrad = ctx.createRadialGradient(
+          tipX * 0.4, -flameH * 0.52, Math.max(2, maxW * 0.2),
+          tipX * 0.4, -flameH * 0.52, haloRadius
+        );
+        haloGrad.addColorStop(0.0, 'rgba(255, 165, 45, 0.52)');
+        haloGrad.addColorStop(0.45, 'rgba(255, 106, 0, 0.22)');
+        haloGrad.addColorStop(0.8, 'rgba(234, 88, 12, 0.06)');
+        haloGrad.addColorStop(1.0, 'rgba(0, 0, 0, 0)');
+
+        ctx.fillStyle = haloGrad;
+        ctx.beginPath();
+        ctx.ellipse(tipX * 0.4, -flameH * 0.52, Math.max(10, maxW * 2.1), Math.max(18, flameH * 0.66), this.tiltX * 0.28, 0, Math.PI * 2);
+        ctx.fill();
+
+        const outerFlameGrad = ctx.createLinearGradient(0, 0, tipX, -flameH);
+        outerFlameGrad.addColorStop(0.00, 'rgba(26, 79, 255, 0.92)');
+        outerFlameGrad.addColorStop(0.16, 'rgba(56, 152, 255, 0.85)');
+        outerFlameGrad.addColorStop(0.28, 'rgba(255, 157, 46, 0.92)');
+        outerFlameGrad.addColorStop(0.75, 'rgba(255, 106, 0, 0.78)');
+        outerFlameGrad.addColorStop(1.00, 'rgba(255, 106, 0, 0)');
+
+        ctx.fillStyle = outerFlameGrad;
+        ctx.beginPath();
+        ctx.moveTo(-baseW, 0);
+        ctx.bezierCurveTo(
+          -maxW * 1.24, -flameH * 0.28,
+          -maxW * 1.02 + tipX * 0.52, -flameH * 0.68,
+          tipX, -flameH
+        );
+        ctx.bezierCurveTo(
+          maxW * 1.02 + tipX * 0.52, -flameH * 0.68,
+          maxW * 1.24, -flameH * 0.28,
+          baseW, 0
+        );
+        ctx.closePath();
+        ctx.fill();
+
+        const coreH = flameH * 0.92;
+        const coreW = maxW * 0.84;
+        const coreGrad = ctx.createLinearGradient(0, -2 * g.scale, tipX * 0.92, -coreH);
+        coreGrad.addColorStop(0.00, 'rgba(15, 45, 180, 0.95)');
+        coreGrad.addColorStop(0.14, 'rgba(40, 115, 245, 0.85)');
+        coreGrad.addColorStop(0.23, 'rgba(255, 210, 130, 0.96)');
+        coreGrad.addColorStop(0.34, 'rgba(255, 255, 255, 1.0)');
+        coreGrad.addColorStop(0.88, 'rgba(255, 255, 255, 0.96)');
+        coreGrad.addColorStop(1.00, 'rgba(255, 230, 170, 0)');
+
+        ctx.fillStyle = coreGrad;
+        ctx.beginPath();
+        ctx.moveTo(-baseW * 0.72, -2 * g.scale);
+        ctx.bezierCurveTo(
+          -coreW, -coreH * 0.28,
+          -coreW * 0.85 + tipX * 0.50, -coreH * 0.68,
+          tipX * 0.94, -coreH
+        );
+        ctx.bezierCurveTo(
+          coreW * 0.85 + tipX * 0.50, -coreH * 0.68,
+          coreW, -coreH * 0.28,
+          baseW * 0.72, -2 * g.scale
+        );
+        ctx.closePath();
+        ctx.fill();
+
+        const bluePocketH = flameH * 0.24;
+        const bluePocketGrad = ctx.createLinearGradient(0, 0, 0, -bluePocketH);
+        bluePocketGrad.addColorStop(0.0, 'rgba(10, 28, 95, 0.95)');
+        bluePocketGrad.addColorStop(0.55, 'rgba(26, 79, 255, 0.75)');
+        bluePocketGrad.addColorStop(1.0, 'rgba(56, 152, 255, 0)');
+
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = bluePocketGrad;
+        ctx.beginPath();
+        ctx.moveTo(-baseW * 0.62, 0);
+        ctx.quadraticCurveTo(-baseW * 0.55, -bluePocketH * 0.75, tipX * 0.14, -bluePocketH);
+        ctx.quadraticCurveTo(baseW * 0.55, -bluePocketH * 0.75, baseW * 0.62, 0);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      drawParticles(ctx) {
+        ctx.save();
+        for (const s of this.sparks) {
+          ctx.fillStyle = `rgba(255, ${Math.floor(180 + s.life * 75)}, 80, ${Math.max(0, s.life)})`;
+          ctx.shadowColor = '#f59e0b';
+          ctx.shadowBlur = 6;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, Math.max(0.5, s.size), 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+
+        ctx.save();
+        for (const sm of this.smoke) {
+          ctx.fillStyle = `rgba(203, 213, 225, ${Math.max(0, sm.alpha)})`;
+          ctx.beginPath();
+          ctx.arc(sm.x, sm.y, Math.max(1, sm.radius), 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+    }
+
+    /**
+     * ============================================================================
+     * 6. INICIALIZACIÓN GLOBAL DEFENSIVA Y CONMUTACIÓN SIN SOLAPAMIENTOS
+     * ============================================================================
+     */
+    function initApp() {
+      if (window.__strobeZippoInitialized) return;
+      window.__strobeZippoInitialized = true;
+
+      try {
+        lockPortraitOrientation();
+
+        const torchController = new SmartHardwareTorchController();
+        const strobeEngine = new StrobeAndAudioEngine(torchController);
+        const zippoAudio = new ProceduralZippoAudio();
+        const zippoSim = new MatteZippoSimulator(torchController, zippoAudio);
+
+        const tabTorch = document.getElementById('tab-torch');
+        const tabZippo = document.getElementById('tab-zippo');
+        const viewTorch = document.getElementById('view-torch');
+        const viewZippo = document.getElementById('view-zippo');
+
+        let activeTab = 'torch';
+        let zippoManualLedOn = false;
+        let zippoAnimId = null;
+        let lastTimestamp = performance.now();
+
+        const startZippoLoop = () => {
+          if (zippoAnimId !== null) return;
+          lastTimestamp = performance.now();
+          const step = (now) => {
+            if (activeTab !== 'zippo' || !zippoSim.isVisible) {
+              zippoAnimId = null;
+              return;
+            }
+            const dt = Math.min((now - lastTimestamp) / 1000, 0.05);
+            lastTimestamp = now;
+            try {
+              zippoSim.updatePhysics(dt);
+              zippoSim.render();
+            } catch (err) {}
+            zippoAnimId = requestAnimationFrame(step);
+          };
+          zippoAnimId = requestAnimationFrame(step);
+        };
+
+        const stopZippoLoop = () => {
+          if (zippoAnimId !== null) {
+            cancelAnimationFrame(zippoAnimId);
+            zippoAnimId = null;
+          }
+          zippoSim.setVisible(false);
+        };
+
+        const updateZippoLedButtonUI = (isOn) => {
+          zippoManualLedOn = isOn;
+          const btn = document.getElementById('btn-zippo-manual-led');
+          const dot = document.getElementById('zippo-led-dot');
+          const txt = document.getElementById('zippo-led-text');
+
+          if (btn) btn.classList.toggle('active-amber', isOn);
+          if (dot) {
+            dot.className = isOn
+              ? 'w-2 h-2 rounded-full bg-white shadow-[0_0_8px_#ffffff] shrink-0'
+              : 'w-2 h-2 rounded-full bg-zinc-500 shrink-0';
+          }
+          if (txt) txt.textContent = isOn ? 'Apagar LED' : 'Encender LED';
+        };
+
+        const toggleZippoManualLed = async () => {
+          try {
+            const nextState = !zippoManualLedOn;
+            if (nextState) {
+              await torchController.initHardware();
+            }
+            await torchController.setTorch(nextState);
+            updateZippoLedButtonUI(nextState);
+          } catch (e) {}
+        };
+
+        const switchTab = (tab) => {
+          activeTab = tab;
+
+          if (tab === 'torch') {
+            // 1. Salir de cualquier pantalla completa residual y detener/limpiar el canvas del Zippo
+            if (zippoSim.isFullscreen || document.body.classList.contains('zippo-fullscreen-mode')) {
+              zippoSim.toggleFullscreen(false);
+            }
+            stopZippoLoop();
+
+            // 2. Alternar visibilidad estricta mediante la clase .active
+            viewZippo.classList.remove('active');
+            viewTorch.classList.add('active');
+
+            tabTorch.className = 'flex-1 py-1.5 px-2.5 rounded-lg font-bold text-xs tracking-wide uppercase flex items-center justify-center gap-1.5 transition-all bg-amber-500/20 text-amber-400 border border-amber-500/40';
+            tabZippo.className = 'flex-1 py-1.5 px-2.5 rounded-lg font-bold text-xs tracking-wide uppercase flex items-center justify-center gap-1.5 transition-all text-zinc-400 hover:text-zinc-200 border border-transparent';
+
+            if (zippoManualLedOn) {
+              updateZippoLedButtonUI(false);
+              torchController.setTorch(false);
+            }
+          } else {
+            // 1. Apagar estroboscopio/micrófono antes de mostrar el mechero
+            strobeEngine.stopAll();
+
+            // 2. Alternar visibilidad estricta mediante la clase .active
+            viewTorch.classList.remove('active');
+            viewZippo.classList.add('active');
+
+            tabZippo.className = 'flex-1 py-1.5 px-2.5 rounded-lg font-bold text-xs tracking-wide uppercase flex items-center justify-center gap-1.5 transition-all bg-amber-500/20 text-amber-400 border border-amber-500/40';
+            tabTorch.className = 'flex-1 py-1.5 px-2.5 rounded-lg font-bold text-xs tracking-wide uppercase flex items-center justify-center gap-1.5 transition-all text-zinc-400 hover:text-zinc-200 border border-transparent';
+
+            // 3. Reactivar canvas del Zippo y su bucle de renderizado al instante
+            zippoSim.setVisible(true);
+            startZippoLoop();
+          }
+        };
+
+        if (tabTorch) tabTorch.addEventListener('click', () => switchTab('torch'));
+        if (tabZippo) tabZippo.addEventListener('click', () => switchTab('zippo'));
+
+        const btnTestLed = document.getElementById('btn-test-led');
+        if (btnTestLed) {
+          btnTestLed.addEventListener('click', () => torchController.runDiagnosticTest());
+        }
+
+        const btnStrobe = document.getElementById('btn-torch-strobe');
+        if (btnStrobe) {
+          btnStrobe.addEventListener('click', () => strobeEngine.toggleStrobe());
+        }
+
+        const btnSteady = document.getElementById('btn-torch-steady');
+        if (btnSteady) {
+          btnSteady.addEventListener('click', () => strobeEngine.toggleSteady());
+        }
+
+        const freqSlider = document.getElementById('strobe-freq-slider');
+        if (freqSlider) {
+          freqSlider.addEventListener('input', (e) => strobeEngine.setFrequency(e.target.value));
+        }
+
+        const btnTapTempo = document.getElementById('btn-tap-tempo');
+        if (btnTapTempo) {
+          btnTapTempo.addEventListener('click', () => strobeEngine.registerTapTempo());
+        }
+
+        const btnMicToggle = document.getElementById('btn-mic-toggle');
+        if (btnMicToggle) {
+          btnMicToggle.addEventListener('click', () => strobeEngine.toggleMicrophone());
+        }
+
+        const rhythmSelect = document.getElementById('rhythm-pattern-select');
+        if (rhythmSelect) {
+          rhythmSelect.addEventListener('change', (e) => {
+            strobeEngine.rhythmPattern = e.target.value;
+            if (strobeEngine.mode === 'mic') {
+              strobeEngine.clearScheduledPulses();
+              torchController.setTorch(strobeEngine.rhythmPattern === 'inverted');
+            }
+          });
+        }
+
+        const threshSlider = document.getElementById('mic-threshold-slider');
+        if (threshSlider) {
+          threshSlider.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value, 10);
+            strobeEngine.threshold = val / 100;
+            const disp = document.getElementById('threshold-val-display');
+            const marker = document.getElementById('mic-threshold-marker');
+            if (disp) disp.textContent = `${val}%`;
+            if (marker) marker.style.left = `${val}%`;
+          });
+        }
+
+        // Controles Pestaña 2: Mechero Zippo
+        const btnSensors = document.getElementById('btn-zippo-sensors');
+        if (btnSensors) {
+          btnSensors.addEventListener('click', (e) => {
+            e.stopPropagation();
+            zippoSim.toggleSensors();
+          });
+        }
+
+        const btnFsEnter = document.getElementById('btn-zippo-fullscreen');
+        if (btnFsEnter) {
+          btnFsEnter.addEventListener('click', (e) => {
+            e.stopPropagation();
+            zippoSim.toggleFullscreen(true);
+          });
+        }
+
+        const btnFsExit = document.getElementById('btn-exit-fullscreen');
+        if (btnFsExit) {
+          btnFsExit.addEventListener('click', (e) => {
+            e.stopPropagation();
+            zippoSim.toggleFullscreen(false);
+          });
+        }
+
+        const handleNativeFullscreenChange = () => {
+          const isNativeFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+          if (!isNativeFs && zippoSim.isFullscreen) {
+            zippoSim.restoreNormalView(false);
+          }
+        };
+        document.addEventListener('fullscreenchange', handleNativeFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleNativeFullscreenChange);
+
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && zippoSim.isFullscreen) {
+            zippoSim.toggleFullscreen(false);
+          }
+        });
+
+        const btnManualLed = document.getElementById('btn-zippo-manual-led');
+        if (btnManualLed) {
+          btnManualLed.addEventListener('click', () => toggleZippoManualLed());
+        }
+
+        const btnSticker = document.getElementById('btn-zippo-sticker');
+        const inputSticker = document.getElementById('zippo-sticker-input');
+        const btnStickerClear = document.getElementById('btn-zippo-sticker-clear');
+
+        if (btnSticker && inputSticker) {
+          btnSticker.addEventListener('click', () => inputSticker.click());
+          inputSticker.addEventListener('change', (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (file) zippoSim.processAndSaveSticker(file);
+          });
+        }
+
+        if (btnStickerClear) {
+          btnStickerClear.addEventListener('click', () => zippoSim.clearSticker());
+        }
+      } catch (fatalErr) {
+        showToast('Error al iniciar');
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+  </script>
+</body>
+</html>
