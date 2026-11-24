@@ -9,13 +9,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="StrobeZippo">
   <title>StrobePro & Zippo Studio</title>
-  <!-- Favicon SVG directo con el icono del flash -->
+  <!-- Favicon SVG directo con el icono del rayo dorado sobre negro mate satinado -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230b0b0c'/%3E%3Crect x='4' y='4' width='56' height='56' rx='13' fill='%2317171a' stroke='%232e2e36' stroke-width='2'/%3E%3Cpath d='M35 11L19 35h11l-3 18 18-24H34l1-18z' fill='%23f59e0b' stroke='%23fef3c7' stroke-width='1.2' stroke-linejoin='round'/%3E%3C/svg%3E">
   <link id="pwa-manifest-link" rel="manifest" href="">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --matte-black: #0b0b0c;
@@ -39,7 +35,7 @@
       min-height: 100dvh;
       background-color: #0b0b0c;
       color: #f3f4f6;
-      font-family: 'Inter', sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       overflow: hidden;
     }
 
@@ -49,7 +45,7 @@
         repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.008) 0px, rgba(255, 255, 255, 0.008) 1px, transparent 1px, transparent 4px);
     }
 
-    /* Respaldo CSS de orientación vertical ('portrait') */
+    /* Respaldo visual de orientación vertical ('portrait') */
     #portrait-lock-wrapper {
       width: 100%;
       height: 100dvh;
@@ -71,7 +67,187 @@
     }
 
     .font-mono-tech {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    /* Utilidades de layout autocontenidas (100% offline sin CDN) */
+    .hidden { display: none !important; }
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .flex-1 { flex: 1 1 0%; }
+    .items-center { align-items: center; }
+    .items-baseline { align-items: baseline; }
+    .justify-between { justify-content: space-between; }
+    .justify-center { justify-content: center; }
+    .shrink-0 { flex-shrink: 0; }
+    .min-w-0 { min-width: 0; }
+    .min-h-0 { min-height: 0; }
+    .w-full { width: 100%; }
+    .h-full { height: 100%; }
+    .max-w-md { max-width: 28rem; }
+    .relative { position: relative; }
+    .absolute { position: absolute; }
+    .fixed { position: fixed; }
+    .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+    .inset-y-0 { top: 0; bottom: 0; }
+    .top-0 { top: 0; }
+    .bottom-0 { bottom: 0; }
+    .top-4 { top: 1rem; }
+    .right-4 { right: 1rem; }
+    .top-14 { top: 3.5rem; }
+    .left-1\/2 { left: 50%; }
+    .-translate-x-1\/2 { transform: translateX(-50%); }
+    .z-10 { z-index: 10; }
+    .z-20 { z-index: 20; }
+    .z-40 { z-index: 40; }
+    .z-50 { z-index: 50; }
+    .overflow-hidden { overflow: hidden; }
+    .pointer-events-none { pointer-events: none; }
+    .cursor-pointer { cursor: pointer; }
+    .block { display: block; }
+    .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .whitespace-nowrap { white-space: nowrap; }
+    .text-right { text-align: right; }
+    .uppercase { text-transform: uppercase; }
+    .appearance-none { -webkit-appearance: none; appearance: none; }
+
+    /* Espaciado */
+    .p-1 { padding: 0.25rem; }
+    .p-2\.5 { padding: 0.625rem; }
+    .px-1\.5 { padding-left: 0.375rem; padding-right: 0.375rem; }
+    .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+    .px-2\.5 { padding-left: 0.625rem; padding-right: 0.625rem; }
+    .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+    .px-3\.5 { padding-left: 0.875rem; padding-right: 0.875rem; }
+    .py-0\.5 { padding-top: 0.125rem; padding-bottom: 0.125rem; }
+    .py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+    .py-2\.5 { padding-top: 0.625rem; padding-bottom: 0.625rem; }
+    .pl-3 { padding-left: 0.75rem; }
+    .pr-8 { padding-right: 2rem; }
+    .pt-2 { padding-top: 0.5rem; }
+    .pb-1\.5 { padding-bottom: 0.375rem; }
+    .pb-2\.5 { padding-bottom: 0.625rem; }
+    .mt-1\.5 { margin-top: 0.375rem; }
+    .gap-1 { gap: 0.25rem; }
+    .gap-1\.5 { gap: 0.375rem; }
+    .gap-2 { gap: 0.5rem; }
+    .gap-2\.5 { gap: 0.625rem; }
+    .grid { display: grid; }
+    .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    /* Dimensiones y bordes */
+    .w-2 { width: 0.5rem; }
+    .h-2 { height: 0.5rem; }
+    .w-2\.5 { width: 0.625rem; }
+    .h-2\.5 { height: 0.625rem; }
+    .w-3 { width: 0.75rem; }
+    .h-3 { height: 0.75rem; }
+    .w-3\.5 { width: 0.875rem; }
+    .h-3\.5 { height: 0.875rem; }
+    .w-4 { width: 1rem; }
+    .h-4 { height: 1rem; }
+    .w-5 { width: 1.25rem; }
+    .h-5 { height: 1.25rem; }
+    .w-6 { width: 1.5rem; }
+    .h-6 { height: 1.5rem; }
+    .w-8 { width: 2rem; }
+    .w-11 { width: 2.75rem; }
+    .h-11 { height: 2.75rem; }
+    .h-8 { height: 2rem; }
+    .h-9 { height: 2.25rem; }
+    .h-\[80px\] { height: 80px; }
+    .w-0 { width: 0; }
+    .w-0\.5 { width: 2px; }
+
+    .rounded { border-radius: 0.25rem; }
+    .rounded-md { border-radius: 0.375rem; }
+    .rounded-lg { border-radius: 0.5rem; }
+    .rounded-xl { border-radius: 0.75rem; }
+    .rounded-2xl { border-radius: 1rem; }
+    .rounded-full { border-radius: 9999px; }
+
+    /* Tipografía y colores */
+    .text-\[9px\] { font-size: 9px; line-height: 1.2; }
+    .text-\[10px\] { font-size: 10px; line-height: 1.3; }
+    .text-\[11px\] { font-size: 11px; line-height: 1.35; }
+    .text-xs { font-size: 0.75rem; line-height: 1rem; }
+    .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+    .text-lg { font-size: 1.125rem; line-height: 1.5rem; }
+    .font-semibold { font-weight: 600; }
+    .font-bold { font-weight: 700; }
+    .font-extrabold { font-weight: 800; }
+    .tracking-tight { letter-spacing: -0.025em; }
+    .tracking-wide { letter-spacing: 0.025em; }
+    .tracking-wider { letter-spacing: 0.05em; }
+
+    .text-white { color: #ffffff; }
+    .text-zinc-100 { color: #f4f4f5; }
+    .text-zinc-200 { color: #e4e4e7; }
+    .text-zinc-300 { color: #d4d4d8; }
+    .text-zinc-400 { color: #a1a1aa; }
+    .text-zinc-500 { color: #71717a; }
+    .text-zinc-600 { color: #52525b; }
+    .text-black { color: #000000; }
+    .text-amber-300 { color: #fcd34d; }
+    .text-amber-400 { color: #fbbf24; }
+    .text-emerald-400 { color: #34d399; }
+    .text-red-400 { color: #f87171; }
+
+    .bg-white { background-color: #ffffff; }
+    .bg-black\/40 { background-color: rgba(0, 0, 0, 0.4); }
+    .bg-black\/55 { background-color: rgba(0, 0, 0, 0.55); }
+    .bg-\[\#09090b\] { background-color: #09090b; }
+    .bg-\[\#111114\] { background-color: #111114; }
+    .bg-\[\#141417\] { background-color: #141417; }
+    .bg-\[\#1c1c21\] { background-color: #1c1c21; }
+    .bg-zinc-500 { background-color: #71717a; }
+    .bg-zinc-600 { background-color: #52525b; }
+    .bg-zinc-700 { background-color: #3f3f46; }
+    .bg-zinc-800 { background-color: #27272a; }
+    .bg-zinc-900 { background-color: #18181b; }
+    .bg-zinc-900\/95 { background-color: rgba(24, 24, 27, 0.95); }
+    .bg-amber-400 { background-color: #fbbf24; }
+    .bg-amber-500 { background-color: #f59e0b; }
+    .bg-amber-500\/20 { background-color: rgba(245, 158, 11, 0.2); }
+    .bg-amber-500\/25 { background-color: rgba(245, 158, 11, 0.25); }
+    .bg-emerald-400 { background-color: #34d399; }
+    .bg-red-400 { background-color: #f87171; }
+    .bg-white\/10 { background-color: rgba(255, 255, 255, 0.1); }
+    .bg-gradient-to-r { background-image: linear-gradient(to right, #10b981, #fbbf24, #ef4444); }
+
+    .border { border-width: 1px; border-style: solid; }
+    .border-transparent { border-color: transparent; }
+    .border-white\/10 { border-color: rgba(255, 255, 255, 0.1); }
+    .border-white\/15 { border-color: rgba(255, 255, 255, 0.15); }
+    .border-white\/25 { border-color: rgba(255, 255, 255, 0.25); }
+    .border-zinc-600 { border-color: #52525b; }
+    .border-zinc-700 { border-color: #3f3f46; }
+    .border-zinc-800 { border-color: #27272a; }
+    .border-amber-300 { border-color: #fcd34d; }
+    .border-amber-400 { border-color: #fbbf24; }
+    .border-amber-500\/35 { border-color: rgba(245, 158, 11, 0.35); }
+    .border-amber-500\/40 { border-color: rgba(245, 158, 11, 0.4); }
+    .border-red-500\/35 { border-color: rgba(239, 68, 68, 0.35); }
+
+    .opacity-0 { opacity: 0; }
+    .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.65); }
+    .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85); }
+    .backdrop-blur-md { -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+    .transition-all { transition: all 0.15s ease; }
+    .transition-colors { transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease; }
+    .transition-opacity { transition: opacity 0.15s ease; }
+    .duration-75 { transition-duration: 75ms; }
+    .duration-150 { transition-duration: 150ms; }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+    .animate-pulse { animation: pulse-dot 1.4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+    select:focus {
+      outline: none;
+      border-color: #f59e0b;
     }
 
     /* Aislamiento estricto de vistas para evitar cualquier solapamiento entre pestañas */
@@ -177,7 +353,7 @@
       transition: opacity 0.015s linear;
     }
 
-    /* Contenedor normal del Zippo (nunca fixed ni z-index elevado fuera de pantalla completa) */
+    /* Contenedor normal del Zippo sin transiciones para restauración instantánea en 0 ms */
     #zippoCard {
       position: relative;
       z-index: auto;
@@ -203,7 +379,7 @@
       animation: none !important;
     }
 
-    /* Pantalla completa minimalista del Zippo (solo activa bajo body.zippo-fullscreen-mode) */
+    /* Pantalla completa minimalista del Zippo */
     body.zippo-fullscreen-mode {
       background-color: #000000 !important;
       background-image: none !important;
@@ -277,12 +453,12 @@
         </div>
 
         <div class="flex items-center gap-1.5 shrink-0">
-          <select id="output-mode-select" aria-label="Modo de salida" class="bg-[#1c1c21] text-zinc-200 border border-zinc-700 rounded-md px-1.5 py-0.5 text-[10px] font-mono-tech focus:outline-none focus:border-amber-500">
+          <select id="output-mode-select" aria-label="Modo de salida" class="bg-[#1c1c21] text-zinc-200 border border-zinc-700 rounded-md px-1.5 py-0.5 text-[10px] font-mono-tech">
             <option value="auto">Auto (LED+Pant.)</option>
             <option value="led">Solo LED Trasero</option>
             <option value="screen">Solo Pantalla</option>
           </select>
-          <button id="btn-test-led" type="button" class="px-2 py-0.5 rounded-md bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-[10px] font-bold text-amber-400 active:scale-95">
+          <button id="btn-test-led" type="button" class="px-2 py-0.5 rounded-md bg-zinc-800 border border-zinc-600 text-[10px] font-bold text-amber-400">
             Test LED
           </button>
         </div>
@@ -296,7 +472,7 @@
           </svg>
           <span>Linterna / Estrobo</span>
         </button>
-        <button id="tab-zippo" type="button" class="flex-1 py-1.5 px-2.5 rounded-lg font-bold text-xs tracking-wide uppercase flex items-center justify-center gap-1.5 transition-all text-zinc-400 hover:text-zinc-200 border border-transparent">
+        <button id="tab-zippo" type="button" class="flex-1 py-1.5 px-2.5 rounded-lg font-bold text-xs tracking-wide uppercase flex items-center justify-center gap-1.5 transition-all text-zinc-400 border border-transparent">
           <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>
           </svg>
@@ -374,7 +550,6 @@
 
         <!-- Tarjeta 3: Micrófono Rítmico -->
         <div class="matte-panel rounded-xl p-2.5 flex-1 min-h-0 flex flex-col justify-between gap-2">
-          <!-- Cabecera y Botón Activar/Desactivar Micrófono -->
           <div class="flex items-center justify-between gap-2 shrink-0">
             <div class="flex items-center gap-2 min-w-0">
               <span class="text-xs font-extrabold uppercase tracking-wider text-white truncate">Micrófono Rítmico</span>
@@ -392,8 +567,8 @@
           <!-- Barra de Nivel de Audio en Tiempo Real + Indicador de Umbral -->
           <div class="flex items-center gap-2 shrink-0">
             <div class="relative flex-1 h-2.5 bg-[#09090b] rounded-full border border-zinc-800 overflow-hidden">
-              <div id="mic-level-bar" class="h-full w-0 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 transition-all duration-75"></div>
-              <div id="mic-threshold-marker" style="left:60%" class="absolute top-0 bottom-0 w-0.5 bg-red-400 shadow-[0_0_4px_#f87171]"></div>
+              <div id="mic-level-bar" class="h-full w-0 rounded-full bg-gradient-to-r transition-all duration-75"></div>
+              <div id="mic-threshold-marker" style="left:60%" class="absolute top-0 bottom-0 w-0.5 bg-red-400"></div>
             </div>
             <span id="mic-level-percent" class="text-[10px] font-mono-tech text-zinc-300 w-8 text-right shrink-0">0%</span>
           </div>
@@ -408,7 +583,7 @@
 
           <!-- Selector de Patrón Rítmico de Ancho Completo -->
           <div class="relative w-full shrink-0">
-            <select id="rhythm-pattern-select" aria-label="Patrón rítmico" class="w-full h-9 bg-[#111114] text-zinc-100 text-xs font-semibold rounded-lg pl-3 pr-8 border border-zinc-700 focus:border-amber-500 focus:outline-none appearance-none">
+            <select id="rhythm-pattern-select" aria-label="Patrón rítmico" class="w-full h-9 bg-[#111114] text-zinc-100 text-xs font-semibold rounded-lg pl-3 pr-8 border border-zinc-700 appearance-none">
               <option value="single">1x Golpe directo (1 pulso por hit)</option>
               <option value="double">2x Doble pulso (2 destellos por hit)</option>
               <option value="triple">3x Tresillo rápido (3 destellos por hit)</option>
@@ -477,7 +652,7 @@
           </div>
 
           <!-- Botón circular minimalista en pantalla completa (solo icono, sin texto) -->
-          <button id="btn-exit-fullscreen" type="button" aria-label="Salir de pantalla completa" class="hidden fixed top-4 right-4 z-40 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 backdrop-blur-md text-white items-center justify-center shadow-2xl">
+          <button id="btn-exit-fullscreen" type="button" aria-label="Salir de pantalla completa" class="hidden fixed top-4 right-4 z-40 w-11 h-11 rounded-full bg-white/10 border border-white/15 backdrop-blur-md text-white items-center justify-center shadow-2xl">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25"/>
             </svg>
@@ -498,7 +673,7 @@
   <script>
     /**
      * ============================================================================
-     * 1. BLOQUEO DE ORIENTACIÓN VERTICAL ('portrait') Y MANIFIESTO PWA DINÁMICO
+     * 1. BLOQUEO DE ORIENTACIÓN VERTICAL ('portrait'), PWA DINÁMICA Y SW OFFLINE
      * ============================================================================
      */
     function lockPortraitOrientation() {
@@ -515,7 +690,7 @@
       } catch (e) {}
     }
 
-    (function setupDynamicPWA() {
+    (function setupDynamicPWAAndOffline() {
       try {
         function createPngIconDataUrl(size) {
           const c = document.createElement('canvas');
@@ -575,6 +750,13 @@
         const manifestURL = URL.createObjectURL(manifestBlob);
         const linkEl = document.getElementById('pwa-manifest-link');
         if (linkEl) linkEl.setAttribute('href', manifestURL);
+      } catch (e) {}
+
+      // Registro silencioso de ./sw.js si existe en el servidor (sin errores en file:// o preview)
+      try {
+        if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+          navigator.serviceWorker.register('./sw.js').catch(() => {});
+        }
       } catch (e) {}
 
       lockPortraitOrientation();
@@ -789,8 +971,8 @@
 
         if (this.beamIndicator && this.beamCore) {
           if (targetState) {
-            this.beamIndicator.className = 'w-6 h-6 rounded-lg bg-amber-500/25 border border-amber-400 flex items-center justify-center shadow-[0_0_12px_rgba(245,158,11,0.5)] transition-all duration-75';
-            this.beamCore.className = 'w-3 h-3 rounded-full bg-white shadow-[0_0_8px_#ffffff] transition-all duration-75';
+            this.beamIndicator.className = 'w-6 h-6 rounded-lg bg-amber-500/25 border border-amber-400 flex items-center justify-center transition-all duration-75';
+            this.beamCore.className = 'w-3 h-3 rounded-full bg-white transition-all duration-75';
           } else {
             this.beamIndicator.className = 'w-6 h-6 rounded-lg bg-zinc-900 border border-zinc-700 flex items-center justify-center transition-all duration-75';
             this.beamCore.className = 'w-2.5 h-2.5 rounded-full bg-zinc-700 transition-all duration-75';
@@ -2623,7 +2805,7 @@
           if (btn) btn.classList.toggle('active-amber', isOn);
           if (dot) {
             dot.className = isOn
-              ? 'w-2 h-2 rounded-full bg-white shadow-[0_0_8px_#ffffff] shrink-0'
+              ? 'w-2 h-2 rounded-full bg-white shrink-0'
               : 'w-2 h-2 rounded-full bg-zinc-500 shrink-0';
           }
           if (txt) txt.textContent = isOn ? 'Apagar LED' : 'Encender LED';
@@ -2644,35 +2826,30 @@
           activeTab = tab;
 
           if (tab === 'torch') {
-            // 1. Salir de cualquier pantalla completa residual y detener/limpiar el canvas del Zippo
             if (zippoSim.isFullscreen || document.body.classList.contains('zippo-fullscreen-mode')) {
               zippoSim.toggleFullscreen(false);
             }
             stopZippoLoop();
 
-            // 2. Alternar visibilidad estricta mediante la clase .active
             viewZippo.classList.remove('active');
             viewTorch.classList.add('active');
 
             tabTorch.className = 'flex-1 py-1.5 px-2.5 rounded-lg font-bold text-xs tracking-wide uppercase flex items-center justify-center gap-1.5 transition-all bg-amber-500/20 text-amber-400 border border-amber-500/40';
-            tabZippo.className = 'flex-1 py-1.5 px-2.5 rounded-lg font-bold text-xs tracking-wide uppercase flex items-center justify-center gap-1.5 transition-all text-zinc-400 hover:text-zinc-200 border border-transparent';
+            tabZippo.className = 'flex-1 py-1.5 px-2.5 rounded-lg font-bold text-xs tracking-wide uppercase flex items-center justify-center gap-1.5 transition-all text-zinc-400 border border-transparent';
 
             if (zippoManualLedOn) {
               updateZippoLedButtonUI(false);
               torchController.setTorch(false);
             }
           } else {
-            // 1. Apagar estroboscopio/micrófono antes de mostrar el mechero
             strobeEngine.stopAll();
 
-            // 2. Alternar visibilidad estricta mediante la clase .active
             viewTorch.classList.remove('active');
             viewZippo.classList.add('active');
 
             tabZippo.className = 'flex-1 py-1.5 px-2.5 rounded-lg font-bold text-xs tracking-wide uppercase flex items-center justify-center gap-1.5 transition-all bg-amber-500/20 text-amber-400 border border-amber-500/40';
-            tabTorch.className = 'flex-1 py-1.5 px-2.5 rounded-lg font-bold text-xs tracking-wide uppercase flex items-center justify-center gap-1.5 transition-all text-zinc-400 hover:text-zinc-200 border border-transparent';
+            tabTorch.className = 'flex-1 py-1.5 px-2.5 rounded-lg font-bold text-xs tracking-wide uppercase flex items-center justify-center gap-1.5 transition-all text-zinc-400 border border-transparent';
 
-            // 3. Reactivar canvas del Zippo y su bucle de renderizado al instante
             zippoSim.setVisible(true);
             startZippoLoop();
           }
@@ -2734,7 +2911,6 @@
           });
         }
 
-        // Controles Pestaña 2: Mechero Zippo
         const btnSensors = document.getElementById('btn-zippo-sensors');
         if (btnSensors) {
           btnSensors.addEventListener('click', (e) => {
